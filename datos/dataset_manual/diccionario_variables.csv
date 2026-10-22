@@ -1,0 +1,24 @@
+variable,tipo,descripcion
+message_id,identificador,Identificador único del mensaje
+gestion,entero,Año de la gestión
+fecha,fecha,Fecha local del mensaje
+hora,entero,Hora local de 0 a 23
+participante,seudonimo,Código anónimo del participante
+texto,texto,Contenido original del mensaje
+caracteres,entero,Número de caracteres
+palabras,entero,Número de palabras normalizadas
+signos_pregunta,entero,Cantidad de signos de pregunta
+signos_exclamacion,entero,Cantidad de signos de exclamación
+emojis,entero,Cantidad aproximada de emojis
+contiene_url,logico,Indica presencia de enlace
+dia_semana,categoria,Día local de la semana
+tipo_muestreo,categoria,Estrategia mediante la cual la fila entró a la muestra
+tiene_sentimiento,categoria,Decisión manual sobre presencia de sentimiento
+polaridad_manual,categoria,Polaridad asignada manualmente
+sentimiento_1,categoria,Sentimiento principal manual
+sentimiento_2,categoria,Segundo sentimiento opcional
+intensidad,ordinal,Intensidad de 0 a 3
+tema,categoria,Tema principal del mensaje
+ironia,categoria,Presencia de ironía
+confianza_anotacion,ordinal,Confianza del anotador
+observaciones,texto,Justificación o nota libre

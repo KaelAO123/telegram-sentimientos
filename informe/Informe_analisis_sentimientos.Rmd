@@ -1,0 +1,264 @@
+---
+title: "Análisis de sentimientos del chat de Temporada de Informática - UMSA"
+author: "Materia: Data Mining"
+date: "`r format(Sys.Date(), '%d/%m/%Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: flatly
+params:
+  anios: null
+---
+
+```{r configuracion, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center")
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(scales)
+mensajes <- read_csv("resultados/datos/mensajes_clasificados.csv", show_col_types = FALSE)
+coincidencias <- read_csv("resultados/datos/coincidencias_emociones.csv", show_col_types = FALSE)
+diccionario <- read_csv("resultados/datos/diccionario_sentimientos.csv", show_col_types = FALSE)
+resumen_emociones <- read_csv("resultados/datos/resumen_emociones.csv", show_col_types = FALSE)
+resumen_polaridad <- read_csv("resultados/datos/resumen_polaridad.csv", show_col_types = FALSE)
+resumen_gestion <- read_csv("resultados/datos/resumen_por_gestion.csv", show_col_types = FALSE)
+comparacion_cobertura <- read_csv("resultados/datos/comparacion_cobertura.csv", show_col_types = FALSE)
+cobertura_gestion <- read_csv("resultados/datos/cobertura_por_gestion.csv", show_col_types = FALSE)
+tipos_coincidencia <- read_csv("resultados/datos/resumen_tipo_coincidencia.csv", show_col_types = FALSE)
+pares_emociones <- read_csv("resultados/datos/coocurrencia_emociones.csv", show_col_types = FALSE)
+motivos_no_clasificados <- read_csv("resultados/datos/resumen_no_clasificados.csv", show_col_types = FALSE)
+archivo_diseno <- "datos/dataset_manual/diseno_muestra.csv"
+diseno_muestra <- if (file.exists(archivo_diseno)) read_csv(archivo_diseno, show_col_types = FALSE) else NULL
+archivo_matriz <- "resultados/preprocesamiento/resumen_matriz_documento_termino.csv"
+resumen_matriz <- if (file.exists(archivo_matriz)) read_csv(archivo_matriz, show_col_types = FALSE) else NULL
+```
+
+# Resumen ejecutivo
+
+Se analizaron **`r scales::number(nrow(mensajes), accuracy = 1, big.mark = ".", decimal.mark = ",")` mensajes de texto**, correspondientes al periodo **`r min(as.Date(mensajes$fecha))` a `r max(as.Date(mensajes$fecha))`**. El método encontró al menos una emoción en **`r scales::percent(mean(mensajes$polaridad != "sin coincidencia"), accuracy = 0.1)`** de los mensajes. La categoría más frecuente fue **`r resumen_emociones$emocion[1]`** (`r scales::number(resumen_emociones$n[1], accuracy = 1, big.mark = ".", decimal.mark = ",")` mensajes).
+
+El resultado describe el lenguaje que coincide con el diccionario proporcionado; no equivale a una medición psicológica de los participantes.
+
+# Objetivo
+
+Construir un dataset propio de sentimientos a partir del chat de temporada de la Carrera de Informática de la UMSA y aplicar técnicas descriptivas de minería de texto en R: limpieza, transformación, frecuencias, patrones, asociaciones, n-gramas y análisis temporal.
+
+# Datos y privacidad
+
+La fuente es una exportación HTML de Telegram. Solo se analizaron mensajes que contienen texto y una fecha válida. Los eventos de servicio, archivos sin texto y stickers sin transcripción quedaron fuera. Los nombres fueron reemplazados por códigos como `P001`; el informe no muestra mensajes individuales ni nombres.
+
+```{r cobertura, echo=FALSE}
+mensajes |>
+  summarise(
+    Mensajes = n(),
+    Participantes = n_distinct(participante),
+    "Primera fecha" = min(as.Date(fecha)),
+    "Última fecha" = max(as.Date(fecha)),
+    Gestiones = paste(sort(unique(gestion)), collapse = ", ")
+  ) |>
+  knitr::kable(caption = "Cobertura del conjunto analizado")
+```
+
+# Metodología
+
+1. Se localizaron y ordenaron automáticamente todos los archivos `messages*.html`.
+2. Se extrajeron identificador, fecha, autor y texto mediante `rvest`.
+3. Se limpió el corpus con `tm`: minúsculas, URL, números, puntuación, palabras vacías y espacios repetidos.
+4. Se tokenizó con `quanteda`, se construyó la matriz documento-término y se generó una representación normalizada mediante stemming en español.
+5. Se buscaron palabras, frases y raíces del léxico entregado en el documento de la materia.
+6. En una segunda versión se añadieron señales gráficas, variantes ortográficas, jerga observada y fórmulas explícitas como “alguien sabe”.
+7. `syuzhet` se usa con un léxico personalizado en español para producir un puntaje auxiliar de polaridad; no se usa su diccionario inglés como verdad del dataset.
+8. Un mensaje puede tener varias emociones. La polaridad es **mixta** si contiene señales positivas y negativas; es **neutra** cuando solo tiene sorpresa o curiosidad. **Sin coincidencia** significa que el léxico no encontró evidencia y no debe interpretarse como neutralidad.
+9. Los resultados se agruparon por emoción, polaridad, mes y gestión.
+
+Este es un método basado en reglas: es transparente y replicable, pero no resuelve siempre negaciones, ironía, contexto, modismos nuevos ni el significado de contenido multimedia.
+
+## Resultado del preprocesamiento
+
+```{r resumen-preprocesamiento, echo=FALSE}
+if (!is.null(resumen_matriz)) {
+  resumen_matriz |>
+    mutate(dispersion = percent(dispersion, accuracy = 0.01)) |>
+    rename(Documentos = documentos, Términos = terminos, `Celdas no cero` = celdas_no_cero, Dispersión = dispersion) |>
+    knitr::kable(caption = "Matriz documento-término generada con quanteda")
+} else {
+  cat("Ejecute `Rscript scripts/05_preprocesamiento_librerias.R` para generar este resumen.")
+}
+```
+
+La dispersión alta es normal en minería de texto: cada mensaje utiliza solo una fracción pequeña del vocabulario total. Las etapas de transformación pueden auditarse en `resultados/preprocesamiento/muestra_tokenizacion_limpieza_normalizacion.csv`.
+
+## Construcción del dataset propio
+
+El corpus anonimizado contiene **`r nrow(mensajes)` mensajes**. Además, el proyecto genera una muestra manual de **`r if (is.null(diseno_muestra)) "tamaño configurable" else sum(diseno_muestra$n)` mensajes**, estratificada por gestión y por señal emocional. Esta muestra está enriquecida para representar categorías poco frecuentes; por tanto, no se utiliza directamente para estimar prevalencias del chat completo.
+
+Las etiquetas manuales incluyen presencia de sentimiento, polaridad, hasta dos sentimientos, intensidad, tema, ironía y confianza del anotador. Las sugerencias del léxico se guardan en un archivo separado que no debe consultarse durante el etiquetado, reduciendo el sesgo de confirmación.
+
+El dataset permite dos anotadores independientes. La validación comprueba valores permitidos, completitud y duplicados, y calcula kappa de Cohen para polaridad y sentimiento cuando existen etiquetas comunes.
+
+La etapa posterior de minería utiliza:
+
+- distribución de sentimientos, polaridades, intensidades y temas;
+- términos frecuentes y TF-IDF por sentimiento;
+- bigramas característicos;
+- coocurrencia de sentimientos;
+- asociaciones entre sentimiento y tema mediante soporte, confianza y *lift*;
+- evolución por gestión, mes, día y hora.
+
+No se entrena un clasificador predictivo: las etiquetas del dataset proceden del trabajo manual del investigador.
+
+## Mejora de cobertura
+
+```{r comparacion-cobertura, echo=FALSE}
+comparacion_cobertura |>
+  mutate(
+    Version = recode(version, original_pdf = "Original del PDF", ampliado_v2 = "Ampliado v2"),
+    Cobertura = percent(cobertura, accuracy = 0.1)
+  ) |>
+  select(Version, Mensajes = mensajes, Clasificados = clasificados, `Sin coincidencia` = sin_coincidencia, Cobertura) |>
+  knitr::kable(caption = "Efecto de la ampliación controlada del diccionario")
+```
+
+La ampliación aumenta la cobertura en **`r number(diff(comparacion_cobertura$cobertura) * 100, accuracy = 0.1, decimal.mark = ",")` puntos porcentuales** y recupera **`r diff(comparacion_cobertura$clasificados)` mensajes**. No se asigna una clase por defecto a los demás mensajes, pues muchos son anuncios, horarios o consultas administrativas sin una emoción explícita.
+
+# Diccionario utilizado
+
+```{r diccionario, echo=FALSE}
+diccionario |>
+  mutate(polaridad = tipo_polaridad) |>
+  select(Emoción = emocion, Polaridad = polaridad, Definición = definicion) |>
+  knitr::kable()
+```
+
+# Resultados
+
+## Emociones detectadas
+
+```{r emociones, echo=FALSE, fig.width=9, fig.height=6}
+resumen_emociones |>
+  mutate(
+    emocion = reorder(emocion, n),
+    tipo = case_when(
+      polaridad_valor > 0 ~ "Positiva",
+      polaridad_valor < 0 ~ "Negativa",
+      TRUE ~ "Neutra"
+    )
+  ) |>
+  ggplot(aes(emocion, n, fill = tipo)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values = c(Positiva = "#238B45", Negativa = "#CB181D", Neutra = "#636363")) +
+  labs(x = NULL, y = "Mensajes", fill = "Tipo") +
+  theme_minimal()
+```
+
+Debido a que la clasificación es multietiqueta, la suma de emociones puede superar el total de mensajes.
+
+```{r tabla-emociones, echo=FALSE}
+resumen_emociones |>
+  mutate("% de mensajes" = percent(porcentaje_mensajes, accuracy = 0.1)) |>
+  select(Emoción = emocion, Mensajes = n, "% de mensajes") |>
+  knitr::kable()
+```
+
+## Polaridad general
+
+```{r polaridad, echo=FALSE, fig.width=8, fig.height=5}
+paleta <- c(
+  positiva = "#238B45", negativa = "#CB181D", neutra = "#636363",
+  mixta = "#756BB1", "sin coincidencia" = "#BDBDBD"
+)
+resumen_polaridad |>
+  ggplot(aes(reorder(polaridad, -n), n, fill = polaridad)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = percent(porcentaje, accuracy = 0.1)), vjust = -0.3) +
+  scale_fill_manual(values = paleta) +
+  labs(x = NULL, y = "Mensajes") +
+  theme_minimal()
+```
+
+```{r tabla-polaridad, echo=FALSE}
+resumen_polaridad |>
+  mutate(Porcentaje = percent(porcentaje, accuracy = 0.1)) |>
+  select(Polaridad = polaridad, Mensajes = n, Porcentaje) |>
+  knitr::kable()
+```
+
+## Comparación por gestión
+
+```{r gestion, echo=FALSE, fig.width=9, fig.height=5}
+resumen_gestion |>
+  ggplot(aes(factor(gestion), porcentaje, fill = polaridad)) +
+  geom_col() +
+  scale_y_continuous(labels = percent) +
+  scale_fill_manual(values = paleta) +
+  labs(x = "Gestión", y = "Proporción de mensajes", fill = "Polaridad") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+## Cobertura y trazabilidad de las reglas
+
+```{r cobertura-gestion, echo=FALSE, fig.width=8, fig.height=5}
+cobertura_gestion |>
+  ggplot(aes(factor(gestion), cobertura)) +
+  geom_col(fill = "#2C7FB8") +
+  geom_text(aes(label = percent(cobertura, accuracy = 0.1)), vjust = -0.3) +
+  scale_y_continuous(labels = percent, limits = c(0, max(cobertura_gestion$cobertura) * 1.18)) +
+  labs(x = "Gestión", y = "Mensajes clasificados") +
+  theme_minimal()
+```
+
+Cada coincidencia conserva la evidencia, el tipo de regla y un nivel de confianza técnico. Las palabras o frases completas tienen confianza alta; raíces, emojis y emoticonos se marcan con confianza media y deben recibir mayor atención durante la validación.
+
+```{r tipos-coincidencia, echo=FALSE}
+tipos_coincidencia |>
+  mutate(tipo_coincidencia = recode(tipo_coincidencia, termino_exacto = "Término o frase", raiz = "Raíz", emoji = "Emoji", emoticon = "Emoticono")) |>
+  select(Tipo = tipo_coincidencia, Confianza = confianza, Coincidencias = n) |>
+  knitr::kable()
+```
+
+## Emociones que aparecen juntas
+
+```{r coocurrencias, echo=FALSE}
+pares_emociones |>
+  slice_head(n = 10) |>
+  select(`Emoción 1` = emocion_1, `Emoción 2` = emocion_2, Mensajes = n) |>
+  knitr::kable(caption = "Principales pares de emociones en un mismo mensaje")
+```
+
+## Diagnóstico de los mensajes restantes
+
+En vez de llamar “neutrales” a todos los mensajes sin evidencia, se registró una razón operativa. Estas razones ayudan a separar limitaciones técnicas de contenido que probablemente no expresa una emoción.
+
+```{r motivos-no-clasificados, echo=FALSE}
+motivos_no_clasificados |>
+  mutate(Porcentaje = percent(porcentaje, accuracy = 0.1)) |>
+  select(Motivo = motivo_no_clasificado, Mensajes = n, Porcentaje) |>
+  knitr::kable()
+```
+
+# Conclusiones y limitaciones
+
+De los **`r sum(mensajes$polaridad != "sin coincidencia")` mensajes clasificados**, **`r percent(mean(mensajes$polaridad[mensajes$polaridad != "sin coincidencia"] == "positiva"), accuracy = 0.1)`** fueron positivos y **`r percent(mean(mensajes$polaridad[mensajes$polaridad != "sin coincidencia"] == "negativa"), accuracy = 0.1)`** negativos. **`r stringr::str_to_title(resumen_emociones$emocion[1])`** representó **`r percent(resumen_emociones$n[1] / sum(resumen_emociones$n), accuracy = 0.1)`** de todas las coincidencias emocionales y fue la señal dominante del léxico ampliado. En todas las gestiones, los mensajes positivos superaron a los negativos dentro del subconjunto clasificado.
+
+Sin embargo, **`r percent(mean(mensajes$polaridad == "sin coincidencia"), accuracy = 0.1)`** del corpus quedó sin coincidencia. Esto representa cobertura limitada del vocabulario, no ausencia de sentimiento, y obliga a interpretar las proporciones de polaridad sobre todo dentro del subconjunto clasificado. Para evaluar validez, se recomienda seleccionar una muestra aleatoria, etiquetarla manualmente por dos personas y calcular precisión, exhaustividad y acuerdo entre evaluadores.
+
+Entre las limitaciones están el sesgo del diccionario, las expresiones locales no incluidas, los mensajes eliminados, la agrupación de todas las cuentas eliminadas bajo un mismo seudónimo y la exclusión de audio, imágenes, videos y stickers. El pie del documento fuente contiene una nota ambigua sobre reemplazos de categorías; este análisis conserva las 15 definiciones desarrolladas en el cuerpo del documento hasta confirmar esa indicación con la docente.
+
+# Reproducibilidad
+
+El análisis completo se ejecuta desde la raíz del proyecto con:
+
+```bash
+Rscript scripts/01_ejecutar_analisis.R
+Rscript scripts/02_generar_dataset_manual.R
+Rscript scripts/03_validar_dataset_manual.R
+Rscript scripts/04_mineria_descriptiva.R
+Rscript scripts/05_preprocesamiento_librerias.R
+```
+
+Los dos últimos scripts se ejecutan conforme avance el etiquetado. Para otra gestión o exportación solo se cambia `CHAT_DIR` y, opcionalmente, `ANIOS_ANALISIS` en `configuracion.R`. La bitácora automática guarda fecha de ejecución, cobertura y huellas MD5 de los HTML de entrada.
+
