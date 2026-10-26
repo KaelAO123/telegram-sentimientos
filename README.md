@@ -36,16 +36,17 @@ La clasificación automática funciona como apoyo exploratorio. Las predicciones
 
 ## Herramientas principales
 
-| Paquete | Uso en el proyecto |
-|---|---|
-| `tm` | Creación del corpus, limpieza, eliminación de palabras vacías y espacios |
-| `quanteda` | Tokenización, stemming en español, documentos y matriz documento-término |
-| `syuzhet` | Cálculo auxiliar de polaridad mediante un léxico personalizado en español |
-| `SnowballC` | Reducción de palabras a raíces |
-| `rvest` y `xml2` | Lectura de los archivos HTML de Telegram |
-| `dplyr`, `tidyr`, `stringr`, `purrr` | Transformación, limpieza y organización de datos |
-| `ggplot2` | Visualización de resultados |
-| `rmarkdown` y `knitr` | Generación del informe reproducible |
+
+| Paquete                              | Uso en el proyecto                                                           |
+| -------------------------------------- | ------------------------------------------------------------------------------ |
+| `tm`                                 | Creación del corpus, limpieza, eliminación de palabras vacías y espacios  |
+| `quanteda`                           | Tokenización, stemming en español, documentos y matriz documento-término  |
+| `syuzhet`                            | Cálculo auxiliar de polaridad mediante un léxico personalizado en español |
+| `SnowballC`                          | Reducción de palabras a raíces                                             |
+| `rvest` y `xml2`                     | Lectura de los archivos HTML de Telegram                                     |
+| `dplyr`, `tidyr`, `stringr`, `purrr` | Transformación, limpieza y organización de datos                           |
+| `ggplot2`                            | Visualización de resultados                                                 |
+| `rmarkdown` y `knitr`                | Generación del informe reproducible                                         |
 
 ## Estructura del proyecto
 
@@ -144,7 +145,7 @@ Las etiquetas admitidas y sus criterios están documentados en el libro de códi
 Rscript scripts/03_validar_dataset_manual.R
 ```
 
-Este paso comprueba etiquetas inválidas, duplicados, campos incompletos y, cuando existen dos anotadores, calcula el acuerdo y señala desacuerdos. El dataset consolidado se guarda como:
+1. Este paso comprueba etiquetas inválidas, duplicados, campos incompletos y, cuando existen dos anotadores, calcula el acuerdo y señala desacuerdos. El dataset consolidado se guarda como:
 
 ```text
 datos/dataset_manual/dataset_sentimientos_umsa.csv
@@ -170,17 +171,18 @@ rmarkdown::render("informe/Informe_analisis_sentimientos.Rmd")
 
 Los principales archivos son:
 
-| Archivo | Propósito |
-|---|---|
-| `corpus_anonimizado.csv` | Corpus completo sin nombres reales |
-| `diseno_muestra.csv` | Selección y estratos de la muestra |
-| `etiquetado_anotador_a.csv` | Plantilla del primer anotador |
-| `etiquetado_anotador_b.csv` | Plantilla opcional del segundo anotador |
+
+| Archivo                                      | Propósito                                                    |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| `corpus_anonimizado.csv`                     | Corpus completo sin nombres reales                            |
+| `diseno_muestra.csv`                         | Selección y estratos de la muestra                           |
+| `etiquetado_anotador_a.csv`                  | Plantilla del primer anotador                                 |
+| `etiquetado_anotador_b.csv`                  | Plantilla opcional del segundo anotador                       |
 | `referencia_reglas_no_usar_al_etiquetar.csv` | Resultado automático reservado para la evaluación posterior |
-| `diccionario_variables.csv` | Definición de las variables |
-| `control_calidad.csv` | Resumen de validaciones y acuerdo |
-| `errores_etiquetado.csv` | Registros que necesitan corrección |
-| `dataset_sentimientos_umsa.csv` | Dataset manual consolidado |
+| `diccionario_variables.csv`                  | Definición de las variables                                  |
+| `control_calidad.csv`                        | Resumen de validaciones y acuerdo                             |
+| `errores_etiquetado.csv`                     | Registros que necesitan corrección                           |
+| `dataset_sentimientos_umsa.csv`              | Dataset manual consolidado                                    |
 
 El contenido de los mensajes y las plantillas etiquetadas se mantienen fuera de Git para proteger la privacidad del chat.
 
@@ -228,3 +230,7 @@ La ampliación reduce `sin_evidencia`, pero no elimina todos los casos: un mensa
 ## Uso académico
 
 Este repositorio fue preparado con fines educativos para la materia Data Mining. Cualquier uso de los datos debe respetar la privacidad de los participantes y las normas institucionales aplicables.
+
+## Documentación para la defensa
+
+La explicación completa del código, los conceptos de minería de texto y todos los archivos CSV se encuentra en [docs/GUIA_DEFENSA_Y_CSV.md](docs/GUIA_DEFENSA_Y_CSV.md).

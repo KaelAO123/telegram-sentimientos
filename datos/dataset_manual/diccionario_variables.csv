@@ -22,3 +22,9 @@ tema,categoria,Tema principal del mensaje
 ironia,categoria,Presencia de ironía
 confianza_anotacion,ordinal,Confianza del anotador
 observaciones,texto,Justificación o nota libre
+responsable,categoria,Integrante responsable del etiquetado en el archivo A
+polaridad_regla,categoria,Polaridad asignada automáticamente por el diccionario
+motivo_no_clasificado,categoria,Razón operativa cuando la regla no encontró evidencia
+emociones_regla,texto,Emociones detectadas automáticamente separadas por punto y coma
+evidencias_regla,texto,Términos raíces emojis o emoticonos que activaron las reglas
+tipos_regla,texto,Tipos de coincidencia automática separados por punto y coma
