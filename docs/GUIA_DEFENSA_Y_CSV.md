@@ -354,50 +354,48 @@ reales.
 
 ## 6. Librerías utilizadas
 
-
-| Librería            | Función en el proyecto                                       |
-| ---------------------- | --------------------------------------------------------------- |
-| `rvest`, `xml2`      | Leer la estructura HTML exportada por Telegram                |
-| `dplyr`, `tidyr`     | Filtrar, unir, agrupar y resumir tablas                       |
-| `stringr`, `stringi` | Normalizar texto, buscar patrones y tratar caracteres Unicode |
-| `purrr`              | Aplicar funciones a varios archivos y categorías             |
-| `lubridate`          | Convertir fechas y obtener gestión, mes, día y hora         |
-| `readr`              | Leer y escribir CSV de manera consistente                     |
-| `ggplot2`, `scales`  | Crear gráficos y porcentajes                                 |
-| `tm`                 | Construir y limpiar un corpus textual                         |
-| `quanteda`           | Tokenizar, retirar stopwords, aplicar stemming y crear DFM    |
-| `SnowballC`          | Proporcionar el algoritmo de stemming en español             |
-| `syuzhet`            | Calcular un puntaje aditivo usando el léxico personalizado   |
-| `rmarkdown`, `knitr` | Generar el informe HTML reproducible                          |
-| `pandas`, `numpy`    | Leer tablas y construir arreglos para el modelado             |
-| `scikit-learn`       | TF-IDF, regresión logística, folds y métricas                 |
-| `sentence-transformers` | Generar embeddings multilingües con MiniLM                 |
-| `scipy.sparse`       | Concatenar TF-IDF disperso con embeddings densos              |
-| `matplotlib`         | Crear gráficos de evaluación y del modelo final               |
-| `joblib`             | Guardar vectorizador, clasificadores y codificador             |
+| Librería                | Función en el proyecto                                        |
+| ----------------------- | ------------------------------------------------------------- |
+| `rvest`, `xml2`         | Leer la estructura HTML exportada por Telegram                |
+| `dplyr`, `tidyr`        | Filtrar, unir, agrupar y resumir tablas                       |
+| `stringr`, `stringi`    | Normalizar texto, buscar patrones y tratar caracteres Unicode |
+| `purrr`                 | Aplicar funciones a varios archivos y categorías              |
+| `lubridate`             | Convertir fechas y obtener gestión, mes, día y hora           |
+| `readr`                 | Leer y escribir CSV de manera consistente                     |
+| `ggplot2`, `scales`     | Crear gráficos y porcentajes                                  |
+| `tm`                    | Construir y limpiar un corpus textual                         |
+| `quanteda`              | Tokenizar, retirar stopwords, aplicar stemming y crear DFM    |
+| `SnowballC`             | Proporcionar el algoritmo de stemming en español              |
+| `syuzhet`               | Calcular un puntaje aditivo usando el léxico personalizado    |
+| `rmarkdown`, `knitr`    | Generar el informe HTML reproducible                          |
+| `pandas`, `numpy`       | Leer tablas y construir arreglos para el modelado             |
+| `scikit-learn`          | TF-IDF, regresión logística, folds y métricas                 |
+| `sentence-transformers` | Generar embeddings multilingües con MiniLM                    |
+| `scipy.sparse`          | Concatenar TF-IDF disperso con embeddings densos              |
+| `matplotlib`            | Crear gráficos de evaluación y del modelo final               |
+| `joblib`                | Guardar vectorizador, clasificadores y codificador            |
 
 ## 7. Organización general del proyecto
 
-
-| Ruta                           | Para qué sirve                                                      |
-| -------------------------------- | ---------------------------------------------------------------------- |
-| `ChatExport_*/`                | Entrada privada de Telegram; no debe subirse a Git                   |
-| `sentimientos_documento.pdf`   | Documento metodológico y fuente inicial de las 15 categorías       |
-| `configuracion.R`              | Centraliza rutas, años seleccionados y zona horaria                 |
-| `R/`                           | Funciones reutilizables; aquí está la lógica del análisis        |
-| `scripts/`                     | Programas ejecutables en el orden `00` a `10`                        |
-| `datos/dataset_manual/`        | Corpus pseudonimizado, plantillas, validación y dataset manual      |
-| `resultados/datos/`            | Resultados del análisis automático del corpus completo             |
-| `resultados/preprocesamiento/` | Evidencias de limpieza, tokenización, stemming y DFM                |
-| `resultados/mineria_dataset/`  | Minería descriptiva del dataset etiquetado manualmente              |
-| `resultados/graficos*/`        | Imágenes creadas por los scripts                                    |
-| `resultados/validacion_cruzada/` | Métricas OOF, folds, clases y gráficos de comparación             |
-| `resultados/modelo_final/`     | Predicciones agregables y artefactos del modelo híbrido              |
-| `informe/`                     | Fuentes Markdown/R Markdown, estilos, dashboard e informes locales   |
-| `resultados/informe/`          | Informe HTML compilado                                               |
-| `docs/`                        | Plan y documentación para comprender y defender el trabajo          |
-| `BITACORA.md`                  | Registro humano de decisiones y cambios importantes                  |
-| `.gitignore`                   | Evita versionar datos privados, resultados regenerables y temporales |
+| Ruta                             | Para qué sirve                                                       |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `ChatExport_*/`                  | Entrada privada de Telegram; no debe subirse a Git                   |
+| `sentimientos_documento.pdf`     | Documento metodológico y fuente inicial de las 15 categorías         |
+| `configuracion.R`                | Centraliza rutas, años seleccionados y zona horaria                  |
+| `R/`                             | Funciones reutilizables; aquí está la lógica del análisis            |
+| `scripts/`                       | Programas ejecutables en el orden `00` a `10`                        |
+| `datos/dataset_manual/`          | Corpus pseudonimizado, plantillas, validación y dataset manual       |
+| `resultados/datos/`              | Resultados del análisis automático del corpus completo               |
+| `resultados/preprocesamiento/`   | Evidencias de limpieza, tokenización, stemming y DFM                 |
+| `resultados/mineria_dataset/`    | Minería descriptiva del dataset etiquetado manualmente               |
+| `resultados/graficos*/`          | Imágenes creadas por los scripts                                     |
+| `resultados/validacion_cruzada/` | Métricas OOF, folds, clases y gráficos de comparación                |
+| `resultados/modelo_final/`       | Predicciones agregables y artefactos del modelo híbrido              |
+| `informe/`                       | Fuentes Markdown/R Markdown, estilos, dashboard e informes locales   |
+| `resultados/informe/`            | Informe HTML compilado                                               |
+| `docs/`                          | Plan y documentación para comprender y defender el trabajo           |
+| `BITACORA.md`                    | Registro humano de decisiones y cambios importantes                  |
+| `.gitignore`                     | Evita versionar datos privados, resultados regenerables y temporales |
 
 ## 8. Explicación del código
 
@@ -416,27 +414,26 @@ Separar la configuración evita modificar rutas dentro de cada script.
 
 Contiene la lógica del análisis general.
 
-
-| Función                          | Explicación                                                                                                |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `verificar_paquetes()`            | Detiene la ejecución con un mensaje claro si falta una dependencia                                         |
+| Función                           | Explicación                                                                                               |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `verificar_paquetes()`            | Detiene la ejecución con un mensaje claro si falta una dependencia                                        |
 | `codificar_senales_graficas()`    | Convierte emojis y emoticonos en códigos textuales antes de retirar símbolos                              |
-| `normalizar_texto()`              | Sustituye señales gráficas, elimina tildes, pasa a minúsculas, retira URL y compacta espacios            |
-| `crear_diccionario_base()`        | Construye las 15 categorías, definiciones, polaridades, términos y raíces iniciales                      |
-| `crear_diccionario()`             | Agrega modismos, emojis y expresiones contextualizadas para el chat                                         |
-| `ordenar_archivos_chat()`         | Encuentra `messages.html`, `messages2.html`, etc. y respeta su orden                                        |
-| `texto_nodo()`                    | Extrae texto de un nodo HTML y maneja nodos ausentes                                                        |
-| `atributo_nodo()`                 | Extrae atributos HTML como la fecha original                                                                |
+| `normalizar_texto()`              | Sustituye señales gráficas, elimina tildes, pasa a minúsculas, retira URL y compacta espacios             |
+| `crear_diccionario_base()`        | Construye las 15 categorías, definiciones, polaridades, términos y raíces iniciales                       |
+| `crear_diccionario()`             | Agrega modismos, emojis y expresiones contextualizadas para el chat                                       |
+| `ordenar_archivos_chat()`         | Encuentra `messages.html`, `messages2.html`, etc. y respeta su orden                                      |
+| `texto_nodo()`                    | Extrae texto de un nodo HTML y maneja nodos ausentes                                                      |
+| `atributo_nodo()`                 | Extrae atributos HTML como la fecha original                                                              |
 | `extraer_mensajes()`              | Lee los HTML, recupera autor, texto y fecha, filtra mensajes vacíos y genera códigos `P001`, `P002`, etc. |
-| `patron_terminos()`               | Crea una expresión regular para palabras o frases exactas                                                  |
-| `patron_raices()`                 | Crea una expresión regular que acepta terminaciones después de una raíz                                  |
+| `patron_terminos()`               | Crea una expresión regular para palabras o frases exactas                                                 |
+| `patron_raices()`                 | Crea una expresión regular que acepta terminaciones después de una raíz                                   |
 | `clasificar_emociones()`          | Busca evidencia por cada categoría y devuelve una fila por mensaje y emoción detectada                    |
 | `palabras_sin_clasificar()`       | Cuenta términos frecuentes en mensajes donde el diccionario no encontró evidencia                         |
-| `asignar_polaridad_mensaje()`     | Resume coincidencias como positiva, negativa, neutra, mixta o sin coincidencia                              |
-| `agregar_diagnostico_cobertura()` | Propone una razón operativa para los mensajes no clasificados                                              |
+| `asignar_polaridad_mensaje()`     | Resume coincidencias como positiva, negativa, neutra, mixta o sin coincidencia                            |
+| `agregar_diagnostico_cobertura()` | Propone una razón operativa para los mensajes no clasificados                                             |
 | `tema_umsa()`                     | Define un estilo visual común para todos los gráficos                                                     |
-| `guardar_graficos()`              | Genera siete gráficos del corpus completo                                                                  |
-| `registrar_bitacora()`            | Guarda fecha, tamaños y huellas MD5 para comprobar reproducibilidad                                        |
+| `guardar_graficos()`              | Genera siete gráficos del corpus completo                                                                 |
+| `registrar_bitacora()`            | Guarda fecha, tamaños y huellas MD5 para comprobar reproducibilidad                                       |
 
 #### Cómo se asigna la polaridad automática
 
@@ -461,17 +458,16 @@ No es una probabilidad ni garantiza que la clasificación sea correcta.
 
 Gestiona la construcción y validación del dataset humano.
 
-
-| Función                        | Explicación                                                                             |
-| --------------------------------- | ------------------------------------------------------------------------------------------ |
-| `normalizar_etiqueta()`         | Uniforma etiquetas escritas con mayúsculas, tildes, espacios, guiones o barras          |
+| Función                         | Explicación                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------- |
+| `normalizar_etiqueta()`         | Uniforma etiquetas escritas con mayúsculas, tildes, espacios, guiones o barras        |
 | `crear_muestra_estratificada()` | Selecciona mensajes por gestión y señal emocional, además de reforzar `sin_evidencia` |
-| `crear_variables_textuales()`   | Calcula longitud, palabras, signos, emojis, URL y día de la semana                      |
-| `crear_referencia_reglas()`     | Guarda aparte la predicción automática para no sesgar a los anotadores                 |
-| `plantilla_etiquetado()`        | Crea las columnas que deben completar los anotadores                                     |
-| `guardar_si_no_existe()`        | Evita sobrescribir un etiquetado existente al repetir el script 02                       |
-| `validar_etiquetas()`           | Normaliza y comprueba que los valores pertenezcan al libro de códigos                   |
-| `calcular_kappa()`              | Calcula manualmente el kappa de Cohen a partir de dos vectores de etiquetas              |
+| `crear_variables_textuales()`   | Calcula longitud, palabras, signos, emojis, URL y día de la semana                    |
+| `crear_referencia_reglas()`     | Guarda aparte la predicción automática para no sesgar a los anotadores                |
+| `plantilla_etiquetado()`        | Crea las columnas que deben completar los anotadores                                  |
+| `guardar_si_no_existe()`        | Evita sobrescribir un etiquetado existente al repetir el script 02                    |
+| `validar_etiquetas()`           | Normaliza y comprueba que los valores pertenezcan al libro de códigos                 |
+| `calcular_kappa()`              | Calcula manualmente el kappa de Cohen a partir de dos vectores de etiquetas           |
 
 La semilla `set.seed(20261024)` permite reproducir la misma muestra mientras no cambie el corpus.
 
@@ -479,15 +475,14 @@ La semilla `set.seed(20261024)` permite reproducir la misma muestra mientras no 
 
 Agrupa las funciones didácticas relacionadas con las librerías vistas en la materia.
 
-
-| Función                  | Explicación                                                                             |
-| --------------------------- | ------------------------------------------------------------------------------------------ |
+| Función                   | Explicación                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------- |
 | `limpiar_textos_tm()`     | Crea un `VCorpus` y aplica URL, minúsculas, números, puntuación, stopwords y espacios |
-| `tokenizar_quanteda()`    | Crea tokens, retira símbolos, números, URL y stopwords; opcionalmente aplica stemming  |
-| `crear_lexico_syuzhet()`  | Convierte el diccionario propio al formato `word`–`value` de `syuzhet`                  |
-| `puntuar_con_syuzhet()`   | Suma valores positivos y negativos presentes en cada texto                               |
-| `frecuencias_dfm()`       | Obtiene los tokens más frecuentes de una DFM                                            |
-| `extraer_top_por_grupo()` | Extrae los principales tokens por sentimiento u otro grupo                               |
+| `tokenizar_quanteda()`    | Crea tokens, retira símbolos, números, URL y stopwords; opcionalmente aplica stemming |
+| `crear_lexico_syuzhet()`  | Convierte el diccionario propio al formato `word`–`value` de `syuzhet`                |
+| `puntuar_con_syuzhet()`   | Suma valores positivos y negativos presentes en cada texto                            |
+| `frecuencias_dfm()`       | Obtiene los tokens más frecuentes de una DFM                                          |
+| `extraer_top_por_grupo()` | Extrae los principales tokens por sentimiento u otro grupo                            |
 
 `syuzhet` no utiliza aquí su léxico inglés predeterminado. Usa un léxico propio en español. Las frases de varias palabras se excluyen de esta puntuación auxiliar porque `get_sentiment()` opera con palabras individuales en esta configuración.
 
@@ -636,33 +631,32 @@ auditar y agregar resultados sin publicar el contenido del mensaje.
 
 Estas variables aparecen en varios CSV:
 
-
-| Variable                             | Significado                                                                      |
-| -------------------------------------- | ---------------------------------------------------------------------------------- |
-| `message_id`                         | Identificador único tomado del HTML de Telegram                                 |
-| `gestion`                            | Año del mensaje                                                                 |
-| `fecha`, `fecha_hora`, `mes`, `hora` | Variables temporales en horario de La Paz                                        |
-| `participante`                       | Código pseudónimo como `P001`; no se exporta el nombre                         |
-| `texto`                              | Mensaje original; es información privada                                        |
+| Variable                             | Significado                                                                   |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| `message_id`                         | Identificador único tomado del HTML de Telegram                               |
+| `gestion`                            | Año del mensaje                                                               |
+| `fecha`, `fecha_hora`, `mes`, `hora` | Variables temporales en horario de La Paz                                     |
+| `participante`                       | Código pseudónimo como `P001`; no se exporta el nombre                        |
+| `texto`                              | Mensaje original; es información privada                                      |
 | `texto_normalizado`                  | Versión en minúsculas, sin tildes, URL ni puntuación y con emojis codificados |
-| `caracteres`                         | Longitud del texto original                                                      |
-| `palabras`                           | Número de palabras en la versión normalizada                                   |
-| `signos_pregunta`                    | Cantidad de `?` y `¿`                                                           |
-| `signos_exclamacion`                 | Cantidad de `!` y `¡`                                                           |
-| `emojis`                             | Conteo aproximado de símbolos emoji                                             |
-| `contiene_url`                       | Indica si el mensaje incluye un enlace                                           |
-| `dia_semana`                         | Día local de lunes a domingo                                                    |
-| `tipo_muestreo`                      | Forma en que el mensaje entró a la muestra                                      |
-| `tiene_sentimiento`                  | `si`, `no` o `dudoso`, decidido manualmente                                      |
-| `polaridad_manual`                   | Positiva, negativa, neutra, mixta, sin sentimiento o ambigua                     |
-| `sentimiento_1`                      | Sentimiento principal manual                                                     |
-| `sentimiento_2`                      | Sentimiento secundario opcional; debe quedar vacío si no existe                 |
-| `intensidad`                         | `0` sin sentimiento, `1` baja, `2` media, `3` alta                               |
-| `tema`                               | Tema principal del mensaje                                                       |
-| `ironia`                             | `si`, `no` o `dudoso`                                                            |
-| `confianza_anotacion`                | Seguridad declarada por el anotador: alta, media o baja                          |
-| `observaciones`                      | Nota o justificación libre                                                      |
-| `responsable`                        | Integrante encargado de la fila en el archivo A                                  |
+| `caracteres`                         | Longitud del texto original                                                   |
+| `palabras`                           | Número de palabras en la versión normalizada                                  |
+| `signos_pregunta`                    | Cantidad de `?` y `¿`                                                         |
+| `signos_exclamacion`                 | Cantidad de `!` y `¡`                                                         |
+| `emojis`                             | Conteo aproximado de símbolos emoji                                           |
+| `contiene_url`                       | Indica si el mensaje incluye un enlace                                        |
+| `dia_semana`                         | Día local de lunes a domingo                                                  |
+| `tipo_muestreo`                      | Forma en que el mensaje entró a la muestra                                    |
+| `tiene_sentimiento`                  | `si`, `no` o `dudoso`, decidido manualmente                                   |
+| `polaridad_manual`                   | Positiva, negativa, neutra, mixta, sin sentimiento o ambigua                  |
+| `sentimiento_1`                      | Sentimiento principal manual                                                  |
+| `sentimiento_2`                      | Sentimiento secundario opcional; debe quedar vacío si no existe               |
+| `intensidad`                         | `0` sin sentimiento, `1` baja, `2` media, `3` alta                            |
+| `tema`                               | Tema principal del mensaje                                                    |
+| `ironia`                             | `si`, `no` o `dudoso`                                                         |
+| `confianza_anotacion`                | Seguridad declarada por el anotador: alta, media o baja                       |
+| `observaciones`                      | Nota o justificación libre                                                    |
+| `responsable`                        | Integrante encargado de la fila en el archivo A                               |
 
 ## 11. Explicación de los CSV de `datos/dataset_manual/`
 
@@ -689,13 +683,12 @@ Segunda plantilla con los mismos 1.085 mensajes, completada independientemente p
 
 Mantiene separadas las predicciones automáticas para evitar sesgo de confirmación durante el etiquetado.
 
-
-| Columna                 | Significado                                              |
-| ------------------------- | ---------------------------------------------------------- |
-| `polaridad_regla`       | Polaridad asignada por el diccionario                    |
-| `motivo_no_clasificado` | Diagnóstico si no hubo coincidencia                     |
-| `emociones_regla`       | Emociones encontradas, separadas por `;`                 |
-| `evidencias_regla`      | Palabras, frases o códigos que activaron las reglas     |
+| Columna                 | Significado                                            |
+| ----------------------- | ------------------------------------------------------ |
+| `polaridad_regla`       | Polaridad asignada por el diccionario                  |
+| `motivo_no_clasificado` | Diagnóstico si no hubo coincidencia                    |
+| `emociones_regla`       | Emociones encontradas, separadas por `;`               |
+| `evidencias_regla`      | Palabras, frases o códigos que activaron las reglas    |
 | `tipos_regla`           | Tipo de coincidencia: término, raíz, emoji o emoticono |
 
 Solo debe consultarse después de terminar el etiquetado humano.
@@ -704,13 +697,12 @@ Solo debe consultarse después de terminar el etiquetado humano.
 
 Describe cuántos mensajes se seleccionaron por año, estrato y tipo de muestreo.
 
-
-| Columna         | Significado                                                               |
-| ----------------- | --------------------------------------------------------------------------- |
-| `gestion`       | Año del estrato                                                          |
+| Columna         | Significado                                                             |
+| --------------- | ----------------------------------------------------------------------- |
+| `gestion`       | Año del estrato                                                         |
 | `estrato`       | Emoción automática usada para diversificar la muestra o `sin_evidencia` |
 | `tipo_muestreo` | Estratificado por gestión-emoción o refuerzo de mensajes sin evidencia  |
-| `n`             | Mensajes seleccionados en esa combinación                                |
+| `n`             | Mensajes seleccionados en esa combinación                               |
 
 La muestra está enriquecida; sus porcentajes no deben presentarse como prevalencia directa del corpus completo sin aplicar pesos muestrales.
 
@@ -718,12 +710,11 @@ La muestra está enriquecida; sus porcentajes no deben presentarse como prevalen
 
 Es un resumen de una sola fila producido por el script 03.
 
-
 | Columna                                        | Significado                                           |
-| ------------------------------------------------ | ------------------------------------------------------- |
-| `filas_totales`                                | Tamaño de la plantilla A                             |
-| `completas_anotador_a`, `completas_anotador_b` | Filas completas y válidas                            |
-| `errores_a`, `errores_b`                       | Valores fuera del libro de códigos                   |
+| ---------------------------------------------- | ----------------------------------------------------- |
+| `filas_totales`                                | Tamaño de la plantilla A                              |
+| `completas_anotador_a`, `completas_anotador_b` | Filas completas y válidas                             |
+| `errores_a`, `errores_b`                       | Valores fuera del libro de códigos                    |
 | `duplicados_a`, `duplicados_b`                 | Identificadores repetidos                             |
 | `filas_comunes`                                | Mensajes completos en A y B                           |
 | `kappa_polaridad`                              | Acuerdo corregido por azar para polaridad             |
@@ -776,12 +767,11 @@ Tabla principal del análisis automático, con una fila por mensaje. Incluye tex
 
 Tabla detallada de evidencias. Puede tener varias filas por mensaje porque un mensaje puede activar varias emociones.
 
-
-| Columna             | Significado                                         |
-| --------------------- | ----------------------------------------------------- |
-| `emocion`           | Categoría encontrada                               |
-| `polaridad_valor`   | `1` positiva, `0` neutra, `-1` negativa             |
-| `evidencia`         | Fragmento que produjo la coincidencia               |
+| Columna             | Significado                                       |
+| ------------------- | ------------------------------------------------- |
+| `emocion`           | Categoría encontrada                              |
+| `polaridad_valor`   | `1` positiva, `0` neutra, `-1` negativa           |
+| `evidencia`         | Fragmento que produjo la coincidencia             |
 | `tipo_coincidencia` | Término exacto, raíz, emoji o emoticono           |
 | `confianza`         | Nivel técnico alta o media según el tipo de regla |
 
@@ -882,13 +872,12 @@ Contiene las diez secuencias de dos tokens más frecuentes por sentimiento. Ayud
 
 Estudia pares de sentimiento y tema.
 
-
-| Columna         | Significado                                              |
-| ----------------- | ---------------------------------------------------------- |
+| Columna         | Significado                                             |
+| --------------- | ------------------------------------------------------- |
 | `juntos`        | Mensajes donde aparece la combinación                   |
-| `soporte`       | Proporción de todo el dataset con la combinación       |
-| `n_sentimiento` | Frecuencia total del sentimiento                         |
-| `n_tema`        | Frecuencia total del tema                                |
+| `soporte`       | Proporción de todo el dataset con la combinación        |
+| `n_sentimiento` | Frecuencia total del sentimiento                        |
+| `n_tema`        | Frecuencia total del tema                               |
 | `confianza`     | Proporción del sentimiento vinculada al tema            |
 | `lift`          | Fuerza relativa de la asociación frente a independencia |
 
@@ -924,13 +913,13 @@ En `resultados/modelo_final/`:
 
 ### Comparación OOF de polaridad
 
-| Modelo | Accuracy | Balanced accuracy | Macro-F1 |
-|---|---:|---:|---:|
-| Baseline mayoritario | 0,422 | 0,167 | 0,099 |
-| Diccionario de reglas | **0,540** | 0,376 | 0,354 |
-| TF-IDF + logística | 0,399 | 0,319 | 0,305 |
-| MiniLM + logística | 0,471 | 0,382 | 0,369 |
-| **Híbrido TF-IDF + MiniLM** | 0,530 | **0,401** | **0,393** |
+| Modelo                      |  Accuracy | Balanced accuracy |  Macro-F1 |
+| --------------------------- | --------: | ----------------: | --------: |
+| Baseline mayoritario        |     0,422 |             0,167 |     0,099 |
+| Diccionario de reglas       | **0,540** |             0,376 |     0,354 |
+| TF-IDF + logística          |     0,399 |             0,319 |     0,305 |
+| MiniLM + logística          |     0,471 |             0,382 |     0,369 |
+| **Híbrido TF-IDF + MiniLM** |     0,530 |         **0,401** | **0,393** |
 
 El diccionario alcanza la mayor accuracy porque funciona bien en algunas clases
 frecuentes, pero el híbrido obtiene el mejor macro-F1 y balanced accuracy. Por eso
@@ -938,13 +927,13 @@ se selecciona el híbrido: distribuye mejor su capacidad entre las seis polarida
 
 ### Comparación OOF de emociones
 
-| Modelo | Exact match | Macro-F1 | Micro-F1 | Hamming loss |
-|---|---:|---:|---:|---:|
-| Baseline sin emoción | 0,492 | 0,000 | 0,000 | 0,052 |
-| Diccionario de reglas | **0,478** | 0,333 | 0,323 | 0,071 |
-| TF-IDF + logística | 0,386 | 0,312 | 0,325 | 0,091 |
-| MiniLM + logística | 0,291 | 0,336 | 0,340 | 0,133 |
-| **Híbrido TF-IDF + MiniLM** | 0,444 | **0,375** | **0,382** | 0,088 |
+| Modelo                      | Exact match |  Macro-F1 |  Micro-F1 | Hamming loss |
+| --------------------------- | ----------: | --------: | --------: | -----------: |
+| Baseline sin emoción        |       0,492 |     0,000 |     0,000 |        0,052 |
+| Diccionario de reglas       |   **0,478** |     0,333 |     0,323 |        0,071 |
+| TF-IDF + logística          |       0,386 |     0,312 |     0,325 |        0,091 |
+| MiniLM + logística          |       0,291 |     0,336 |     0,340 |        0,133 |
+| **Híbrido TF-IDF + MiniLM** |       0,444 | **0,375** | **0,382** |        0,088 |
 
 El baseline parece tener exact match alto porque casi la mitad de las filas no tiene
 ninguna de las diez emociones. Sin embargo, su macro-F1 y micro-F1 son cero: nunca
@@ -953,18 +942,18 @@ modelo usando solamente accuracy.
 
 ### F1 del híbrido por emoción
 
-| Emoción | Soporte | Precisión | Recall | F1 |
-|---|---:|---:|---:|---:|
-| Gratitud | 43 | 0,878 | 0,837 | **0,857** |
-| Admiración | 24 | 0,516 | 0,667 | 0,582 |
-| Curiosidad | 143 | 0,434 | 0,643 | 0,518 |
-| Preocupación | 108 | 0,314 | 0,546 | 0,399 |
-| Decepción | 60 | 0,246 | 0,517 | 0,333 |
-| Alegría | 28 | 0,225 | 0,571 | 0,323 |
-| Tristeza | 29 | 0,148 | 0,586 | 0,236 |
-| Esperanza | 51 | 0,167 | 0,216 | 0,188 |
-| Enojo | 24 | 0,154 | 0,167 | 0,160 |
-| Confusión | 52 | 0,120 | 0,231 | 0,158 |
+| Emoción      | Soporte | Precisión | Recall |        F1 |
+| ------------ | ------: | --------: | -----: | --------: |
+| Gratitud     |      43 |     0,878 |  0,837 | **0,857** |
+| Admiración   |      24 |     0,516 |  0,667 |     0,582 |
+| Curiosidad   |     143 |     0,434 |  0,643 |     0,518 |
+| Preocupación |     108 |     0,314 |  0,546 |     0,399 |
+| Decepción    |      60 |     0,246 |  0,517 |     0,333 |
+| Alegría      |      28 |     0,225 |  0,571 |     0,323 |
+| Tristeza     |      29 |     0,148 |  0,586 |     0,236 |
+| Esperanza    |      51 |     0,167 |  0,216 |     0,188 |
+| Enojo        |      24 |     0,154 |  0,167 |     0,160 |
+| Confusión    |      52 |     0,120 |  0,231 |     0,158 |
 
 La variación demuestra que un único macro-F1 no cuenta toda la historia. Gratitud
 es reconocida con mucha mayor estabilidad que confusión o enojo. Las emociones con
@@ -1126,19 +1115,19 @@ Estas cantidades son estimaciones del modelo, no etiquetas humanas ni diagnósti
 
 ### Emociones predichas en el corpus completo
 
-| Categoría | Mensajes | % del corpus |
-|---|---:|---:|
-| Sin sentimiento | 8.919 | 41,4 % |
-| Curiosidad | 5.558 | 25,8 % |
-| Preocupación | 2.280 | 10,6 % |
-| Tristeza | 1.783 | 8,3 % |
-| Confusión | 1.531 | 7,1 % |
-| Decepción | 1.309 | 6,1 % |
-| Esperanza | 879 | 4,1 % |
-| Gratitud | 731 | 3,4 % |
-| Alegría | 694 | 3,2 % |
-| Admiración | 513 | 2,4 % |
-| Enojo | 467 | 2,2 % |
+| Categoría       | Mensajes | % del corpus |
+| --------------- | -------: | -----------: |
+| Sin sentimiento |    8.919 |       41,4 % |
+| Curiosidad      |    5.558 |       25,8 % |
+| Preocupación    |    2.280 |       10,6 % |
+| Tristeza        |    1.783 |        8,3 % |
+| Confusión       |    1.531 |        7,1 % |
+| Decepción       |    1.309 |        6,1 % |
+| Esperanza       |      879 |        4,1 % |
+| Gratitud        |      731 |        3,4 % |
+| Alegría         |      694 |        3,2 % |
+| Admiración      |      513 |        2,4 % |
+| Enojo           |      467 |        2,2 % |
 
 Los porcentajes emocionales no suman 100 % porque un mensaje puede activar más de
 una emoción. `sin_sentimiento` se usa cuando ninguna probabilidad emocional supera
@@ -1183,7 +1172,7 @@ Reconocer una limitación no debilita el proyecto: muestra que el grupo comprend
 
 Se compararon regresiones logísticas sobre TF-IDF, embeddings MiniLM congelados y
 la concatenación de ambas representaciones. El híbrido fue elegido porque obtuvo el
-mejor macro-F1 fuera de muestra en las dos tareas. No se hizo *fine-tuning* de una
+mejor macro-F1 fuera de muestra en las dos tareas. No se hizo _fine-tuning_ de una
 red neuronal porque el dataset es pequeño y se prefirió un modelo más reproducible.
 
 ### ¿Cuál es la verdad de referencia?
@@ -1390,19 +1379,19 @@ saber de dónde sale cada resultado y reconocer con claridad sus límites.
 
 ## 24. Mapa rápido: entrada, proceso y salida de cada script
 
-| Script | Entrada principal | Qué hace | Salida principal |
-|---|---|---|---|
-| `00_instalar_paquetes.R` | Lista de dependencias | Comprueba e instala paquetes de R | Entorno preparado |
-| `01_ejecutar_analisis.R` | `ChatExport_*/messages*.html` | Extrae, pseudonimiza, aplica reglas y resume | `resultados/datos/` y gráficos |
-| `02_generar_dataset_manual.R` | Mensajes clasificados | Diseña muestra y separa referencia automática | Plantillas A/B y diseño muestral |
-| `03_validar_dataset_manual.R` | Etiquetados A/B | Valida campos, mide acuerdo y prepara consenso | Calidad, errores, consenso y desacuerdos |
-| `04_mineria_descriptiva.R` | Dataset manual válido | Frecuencias, TF-IDF, bigramas y asociaciones | `resultados/mineria_dataset/` |
-| `05_preprocesamiento_librerias.R` | Corpus anonimizado | Demuestra `tm`, `quanteda`, stemming, DFM y `syuzhet` | `resultados/preprocesamiento/` |
-| `06_corregir_etiquetado_b.R` | Plantilla B y correcciones | Aplica correcciones mecánicas auditables | B corregido y registro de cambios |
-| `07_consolidar_adjudicaciones.R` | Consenso y adjudicación | Construye los objetivos finales | `dataset_modelado_umsa.csv` |
-| `08_modelo_embeddings.py` | Dataset final o consenso | Benchmark exploratorio de una partición | `resultados/modelos_embeddings/` |
-| `09_validacion_cruzada.py` | Dataset final | Cinco folds agrupados y selección de modelo | `resultados/validacion_cruzada/` |
-| `10_clasificar_corpus.py` | Dataset final, corpus y configuración CV | Entrena híbrido y predice todo el corpus | `resultados/modelo_final/` |
+| Script                            | Entrada principal                        | Qué hace                                              | Salida principal                         |
+| --------------------------------- | ---------------------------------------- | ----------------------------------------------------- | ---------------------------------------- |
+| `00_instalar_paquetes.R`          | Lista de dependencias                    | Comprueba e instala paquetes de R                     | Entorno preparado                        |
+| `01_ejecutar_analisis.R`          | `ChatExport_*/messages*.html`            | Extrae, pseudonimiza, aplica reglas y resume          | `resultados/datos/` y gráficos           |
+| `02_generar_dataset_manual.R`     | Mensajes clasificados                    | Diseña muestra y separa referencia automática         | Plantillas A/B y diseño muestral         |
+| `03_validar_dataset_manual.R`     | Etiquetados A/B                          | Valida campos, mide acuerdo y prepara consenso        | Calidad, errores, consenso y desacuerdos |
+| `04_mineria_descriptiva.R`        | Dataset manual válido                    | Frecuencias, TF-IDF, bigramas y asociaciones          | `resultados/mineria_dataset/`            |
+| `05_preprocesamiento_librerias.R` | Corpus anonimizado                       | Demuestra `tm`, `quanteda`, stemming, DFM y `syuzhet` | `resultados/preprocesamiento/`           |
+| `06_corregir_etiquetado_b.R`      | Plantilla B y correcciones               | Aplica correcciones mecánicas auditables              | B corregido y registro de cambios        |
+| `07_consolidar_adjudicaciones.R`  | Consenso y adjudicación                  | Construye los objetivos finales                       | `dataset_modelado_umsa.csv`              |
+| `08_modelo_embeddings.py`         | Dataset final o consenso                 | Benchmark exploratorio de una partición               | `resultados/modelos_embeddings/`         |
+| `09_validacion_cruzada.py`        | Dataset final                            | Cinco folds agrupados y selección de modelo           | `resultados/validacion_cruzada/`         |
+| `10_clasificar_corpus.py`         | Dataset final, corpus y configuración CV | Entrena híbrido y predice todo el corpus              | `resultados/modelo_final/`               |
 
 Una forma sencilla de memorizar el flujo es:
 
@@ -1556,50 +1545,50 @@ Todos deben memorizar:
 
 ## 27. Errores frecuentes al explicar el proyecto
 
-| Explicación incorrecta | Explicación correcta |
-|---|---|
-| “El diccionario tiene 24,6 % de precisión.” | Tiene 24,6 % de cobertura; su calidad se evalúa contra etiquetas humanas. |
-| “El 42,2 % de todo el chat no tiene sentimiento.” | 42,2 % corresponde al dataset manual enriquecido; el corpus completo tiene predicciones del modelo. |
-| “MiniLM es una red que entrenamos desde cero.” | Se usó un MiniLM preentrenado y congelado para generar embeddings. |
-| “El híbrido tiene 39,3 % de accuracy.” | Tiene macro-F1 0,393; su accuracy de polaridad es 0,530. |
-| “Cada mensaje tiene una emoción.” | Puede tener ninguna, una o varias emociones. |
-| “Neutral y sin sentimiento son iguales.” | Neutral tiene contenido evaluable sin orientación dominante; sin sentimiento carece de señal suficiente. |
-| “El modelo entiende el contexto completo del chat.” | Clasifica principalmente cada mensaje de forma individual. |
-| “La anonimización elimina todo riesgo.” | Seudonimizar nombres reduce exposición, pero el texto sigue siendo privado. |
-| “La validación usó el mismo conjunto para entrenar y probar.” | Cada predicción OOF se produjo sin entrenar con esa fila. |
-| “Los textos repetidos se repartieron al azar.” | Los duplicados se agruparon por hash y no cruzaron entre entrenamiento y prueba. |
-| “Mayor frecuencia significa mayor F1.” | Frecuencia en el corpus y calidad de clasificación son conceptos distintos. |
-| “Los porcentajes emocionales deberían sumar 100 %.” | No suman 100 % porque la tarea es multietiqueta. |
+| Explicación incorrecta                                        | Explicación correcta                                                                                     |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| “El diccionario tiene 24,6 % de precisión.”                   | Tiene 24,6 % de cobertura; su calidad se evalúa contra etiquetas humanas.                                |
+| “El 42,2 % de todo el chat no tiene sentimiento.”             | 42,2 % corresponde al dataset manual enriquecido; el corpus completo tiene predicciones del modelo.      |
+| “MiniLM es una red que entrenamos desde cero.”                | Se usó un MiniLM preentrenado y congelado para generar embeddings.                                       |
+| “El híbrido tiene 39,3 % de accuracy.”                        | Tiene macro-F1 0,393; su accuracy de polaridad es 0,530.                                                 |
+| “Cada mensaje tiene una emoción.”                             | Puede tener ninguna, una o varias emociones.                                                             |
+| “Neutral y sin sentimiento son iguales.”                      | Neutral tiene contenido evaluable sin orientación dominante; sin sentimiento carece de señal suficiente. |
+| “El modelo entiende el contexto completo del chat.”           | Clasifica principalmente cada mensaje de forma individual.                                               |
+| “La anonimización elimina todo riesgo.”                       | Seudonimizar nombres reduce exposición, pero el texto sigue siendo privado.                              |
+| “La validación usó el mismo conjunto para entrenar y probar.” | Cada predicción OOF se produjo sin entrenar con esa fila.                                                |
+| “Los textos repetidos se repartieron al azar.”                | Los duplicados se agruparon por hash y no cruzaron entre entrenamiento y prueba.                         |
+| “Mayor frecuencia significa mayor F1.”                        | Frecuencia en el corpus y calidad de clasificación son conceptos distintos.                              |
+| “Los porcentajes emocionales deberían sumar 100 %.”           | No suman 100 % porque la tarea es multietiqueta.                                                         |
 
 ## 28. Glosario rápido para repasar
 
-| Término | Definición breve |
-|---|---|
-| Corpus | Conjunto de mensajes analizados. |
-| Token | Unidad textual, normalmente una palabra. |
-| Stopword | Palabra frecuente con poco poder descriptivo. |
-| Stemming | Reducción de palabras a una raíz. |
-| DFM | Matriz de documentos por términos. |
-| TF-IDF | Peso que destaca términos distintivos. |
-| Embedding | Vector denso que representa significado aproximado. |
-| Etiqueta | Categoría humana o predicha asociada a un mensaje. |
-| Multiclase | Se elige una sola clase entre varias. |
-| Multietiqueta | Se pueden elegir varias etiquetas simultáneas. |
-| Baseline | Referencia mínima que un modelo debe superar. |
-| Fold | Una partición de la validación cruzada. |
-| OOF | Predicción obtenida cuando la fila estaba fuera del entrenamiento. |
-| Fuga de información | Uso accidental de información de prueba durante entrenamiento. |
-| Precisión | Qué proporción de las predicciones positivas fue correcta. |
-| Recall | Qué proporción de los positivos reales fue encontrada. |
-| F1 | Equilibrio armónico entre precisión y recall. |
-| Macro-F1 | Promedio de F1 dando igual peso a cada clase. |
-| Micro-F1 | F1 calculado acumulando todas las decisiones. |
-| Kappa | Acuerdo humano corregido por azar. |
-| Jaccard | Similitud entre dos conjuntos de emociones. |
-| Hamming loss | Proporción de decisiones multietiqueta incorrectas. |
-| Cobertura | Proporción de mensajes reconocidos por el diccionario. |
-| Adjudicación | Decisión final documentada sobre un desacuerdo. |
-| Pseudonimización | Sustitución de nombres por códigos; no elimina todo riesgo. |
+| Término             | Definición breve                                                   |
+| ------------------- | ------------------------------------------------------------------ |
+| Corpus              | Conjunto de mensajes analizados.                                   |
+| Token               | Unidad textual, normalmente una palabra.                           |
+| Stopword            | Palabra frecuente con poco poder descriptivo.                      |
+| Stemming            | Reducción de palabras a una raíz.                                  |
+| DFM                 | Matriz de documentos por términos.                                 |
+| TF-IDF              | Peso que destaca términos distintivos.                             |
+| Embedding           | Vector denso que representa significado aproximado.                |
+| Etiqueta            | Categoría humana o predicha asociada a un mensaje.                 |
+| Multiclase          | Se elige una sola clase entre varias.                              |
+| Multietiqueta       | Se pueden elegir varias etiquetas simultáneas.                     |
+| Baseline            | Referencia mínima que un modelo debe superar.                      |
+| Fold                | Una partición de la validación cruzada.                            |
+| OOF                 | Predicción obtenida cuando la fila estaba fuera del entrenamiento. |
+| Fuga de información | Uso accidental de información de prueba durante entrenamiento.     |
+| Precisión           | Qué proporción de las predicciones positivas fue correcta.         |
+| Recall              | Qué proporción de los positivos reales fue encontrada.             |
+| F1                  | Equilibrio armónico entre precisión y recall.                      |
+| Macro-F1            | Promedio de F1 dando igual peso a cada clase.                      |
+| Micro-F1            | F1 calculado acumulando todas las decisiones.                      |
+| Kappa               | Acuerdo humano corregido por azar.                                 |
+| Jaccard             | Similitud entre dos conjuntos de emociones.                        |
+| Hamming loss        | Proporción de decisiones multietiqueta incorrectas.                |
+| Cobertura           | Proporción de mensajes reconocidos por el diccionario.             |
+| Adjudicación        | Decisión final documentada sobre un desacuerdo.                    |
+| Pseudonimización    | Sustitución de nombres por códigos; no elimina todo riesgo.        |
 
 ## 29. Autoevaluación del grupo
 
