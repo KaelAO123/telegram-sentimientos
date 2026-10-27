@@ -134,7 +134,9 @@ validar_etiquetas <- function(datos) {
       ),
       intensidad = stringr::str_squish(dplyr::coalesce(as.character(.data$intensidad), "")),
       fila_completa = .data$tiene_sentimiento %in% c("si", "no", "dudoso") &
-        .data$polaridad_manual != "" & .data$sentimiento_1 != "" & .data$tema != "",
+        .data$polaridad_manual != "" & .data$sentimiento_1 != "" &
+        .data$intensidad != "" & .data$tema != "" & .data$ironia != "" &
+        .data$confianza_anotacion != "",
       error = dplyr::case_when(
         !.data$tiene_sentimiento %in% c("si", "no", "dudoso", "") ~ "tiene_sentimiento invalido",
         !.data$polaridad_manual %in% polaridades ~ "polaridad invalida",

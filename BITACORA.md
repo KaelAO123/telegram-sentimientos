@@ -42,3 +42,31 @@ El pie del PDF dice: “Amor por (frustración – cansancio), seguridad / Verg�
 - Se generó una tabla con las etapas original, limpia, normalizada, tokenizada y reducida a raíces.
 - La matriz documento-término resultante contiene 21.546 documentos y 10.421 términos.
 
+## 2026-10-26 — Consenso y benchmark preliminar de embeddings
+
+- Se corrigieron tres valores mecánicamente inválidos del anotador B, conservando
+  sin completar una fila que requiere decisión humana.
+- B quedó con 713 filas completas válidas y 713 filas comunes con A.
+- El acuerdo fue moderado: kappa 0,481 en polaridad y 0,498 en sentimiento principal.
+- Se creó un dataset de consenso, una plantilla de adjudicación y trazabilidad de
+  las correcciones.
+- Se compararon el diccionario, TF-IDF y embeddings MiniLM sobre 300 acuerdos A/B,
+  eliminando duplicados entre entrenamiento y prueba.
+- El diccionario obtuvo mejor macro-F1 preliminar que MiniLM tanto en polaridad como
+  en ocho emociones. La evaluación no es final por el desbalance del test y por el
+  muestreo enriquecido mediante reglas.
+
+## 2026-10-26 — Adjudicación, validación cruzada y modelo final
+
+- Se completaron las 1.085 anotaciones de A y B y se corrigieron todas las etiquetas
+  inválidas. Antes de adjudicar, kappa fue 0,418 en polaridad y 0,432 en emoción principal.
+- Se resolvieron los desacuerdos y se generó `dataset_modelado_umsa.csv` sin objetivos vacíos.
+- La evaluación final usa cinco folds estratificados por polaridad y agrupados por hash
+  de texto, de modo que un texto duplicado nunca aparece a ambos lados de un fold.
+- Se compararon mayoría/sin emoción, diccionario, TF-IDF, MiniLM y el híbrido
+  TF-IDF+MiniLM sobre predicciones fuera de muestra de las 1.085 filas.
+- El híbrido obtuvo el mejor macro-F1: 0,393 en polaridad y 0,375 en diez emociones.
+- Se entrenó el híbrido con todo el dataset y se clasificaron los 21.546 mensajes.
+  Las predicciones exportadas excluyen texto y participantes y se interpretan de
+  forma agregada y exploratoria.
+

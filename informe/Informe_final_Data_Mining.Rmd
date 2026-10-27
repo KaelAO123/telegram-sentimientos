@@ -1,0 +1,707 @@
+---
+lang: es
+output:
+  word_document:
+    toc: false
+    number_sections: true
+    fig_caption: true
+---
+
+```{r configuracion, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  dpi = 180,
+  python.reticulate = FALSE
+)
+raiz_proyecto <- normalizePath("..")
+ruta <- function(...) file.path(raiz_proyecto, ...)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(stringr)
+library(scales)
+library(knitr)
+
+control <- read_csv(ruta("datos/dataset_manual/control_calidad.csv"), show_col_types = FALSE)
+acuerdo <- read_csv(ruta("datos/dataset_manual/acuerdo_por_variable.csv"), show_col_types = FALSE)
+dataset <- read_csv(ruta("datos/dataset_manual/dataset_modelado_umsa.csv"), show_col_types = FALSE)
+metricas_cv <- read_csv(ruta("resultados/validacion_cruzada/comparacion_modelos.csv"), show_col_types = FALSE)
+resumen_folds <- read_csv(ruta("resultados/validacion_cruzada/resumen_folds.csv"), show_col_types = FALSE)
+metricas_clase <- read_csv(ruta("resultados/validacion_cruzada/metricas_por_clase.csv"), show_col_types = FALSE)
+predicciones <- read_csv(ruta("resultados/modelo_final/predicciones_corpus.csv"), show_col_types = FALSE)
+polaridad_corpus <- read_csv(ruta("resultados/modelo_final/resumen_polaridad.csv"), show_col_types = FALSE)
+emociones_corpus <- read_csv(ruta("resultados/modelo_final/resumen_emociones.csv"), show_col_types = FALSE)
+cobertura <- read_csv(ruta("resultados/datos/comparacion_cobertura.csv"), show_col_types = FALSE)
+matriz <- read_csv(ruta("resultados/preprocesamiento/resumen_matriz_documento_termino.csv"), show_col_types = FALSE)
+
+n_corpus <- nrow(predicciones)
+n_dataset <- nrow(dataset)
+fecha_min <- min(as.Date(predicciones$fecha))
+fecha_max <- max(as.Date(predicciones$fecha))
+```
+
+**[NOMBRE DE LA UNIVERSIDAD]**
+
+**[FACULTAD Y CARRERA]**
+
+**Materia: Data Mining**
+
+**Análisis de sentimientos y emociones en el grupo de Telegram de Temporada 2026 de la Carrera de Informática**
+
+**Docente:** [Completar]
+
+**Integrantes:** [Completar]
+
+**Paralelo:** [Completar]
+
+**Lugar y fecha:** La Paz, Bolivia — [Completar]
+
+> Esta primera página está reservada para que el grupo reemplace o diseñe la carátula definitiva.
+
+```{=openxml}
+<w:p><w:r><w:br w:type="page"/></w:r></w:p>
+```
+
+**CONTENIDO**
+
+1. Resumen
+2. Introducción
+3. Planteamiento del problema
+4. Objetivos
+5. Alcance, privacidad y consideraciones éticas
+6. Fundamentos conceptuales
+7. Metodología
+8. Implementación y fragmentos de código
+9. Resultados
+10. Discusión
+11. Limitaciones
+12. Conclusiones
+13. Recomendaciones
+14. Reproducibilidad
+15. Referencias
+16. Anexos
+
+```{=openxml}
+<w:p><w:r><w:br w:type="page"/></w:r></w:p>
+```
+
+# Resumen
+
+El presente trabajo desarrolla un proceso reproducible de minería de texto y análisis
+de sentimientos sobre el grupo de Telegram de Temporada 2026 de la Carrera de
+Informática. La exportación disponible contiene `r format(n_corpus, big.mark = ".", decimal.mark = ",")`
+mensajes comprendidos entre `r format(fecha_min, "%d/%m/%Y")` y
+`r format(fecha_max, "%d/%m/%Y")`. Los participantes fueron pseudonimizados y los
+resultados destinados a presentación se mantienen en forma agregada.
+
+El proyecto combina reglas lingüísticas, técnicas clásicas de representación de texto
+y aprendizaje supervisado. Primero se construyó un diccionario contextual de
+sentimientos, se limpió y tokenizó el corpus y se generó una muestra estratificada de
+`r format(n_dataset, big.mark = ".", decimal.mark = ",")` mensajes. La muestra fue etiquetada por dos
+anotadores y los desacuerdos fueron adjudicados para crear una referencia final.
+
+Se compararon cinco alternativas: clase mayoritaria o ausencia de emoción,
+diccionario de reglas, regresión logística con TF-IDF, regresión logística con
+embeddings MiniLM y un modelo híbrido TF-IDF+MiniLM. La evaluación se realizó con
+cinco particiones estratificadas y agrupadas por texto, evitando que mensajes
+duplicados aparezcan simultáneamente en entrenamiento y prueba. El híbrido obtuvo
+el mejor macro-F1: **0,393 en polaridad** y **0,375 en diez emociones**. Finalmente,
+se entrenó con toda la referencia y se aplicó al corpus completo. Las predicciones
+se interpretan como estimaciones exploratorias del modelo y no como diagnósticos
+psicológicos individuales.
+
+**Palabras clave:** minería de texto, análisis de sentimientos, emociones,
+Telegram, TF-IDF, embeddings, MiniLM, clasificación multietiqueta.
+
+# Introducción
+
+Los grupos de mensajería instantánea se han convertido en espacios relevantes para
+la coordinación académica. En ellos se comparten consultas, horarios, anuncios,
+recomendaciones, dificultades y expresiones emocionales. Debido al volumen y a la
+variedad del lenguaje, una revisión manual completa resulta costosa, por lo que la
+minería de texto permite organizar y resumir patrones de manera sistemática.
+
+El análisis de sentimientos busca identificar la orientación afectiva expresada en
+un texto, mientras que el análisis de emociones intenta reconocer categorías más
+específicas, como alegría, preocupación, tristeza o enojo. En conversaciones
+estudiantiles aparecen dificultades adicionales: abreviaciones, errores ortográficos,
+emojis, mensajes muy breves, ironía, modismos locales y dependencia del contexto.
+Por ello, un diccionario de palabras aisladas no es suficiente y debe contrastarse
+con etiquetas humanas y modelos capaces de representar semejanza semántica.
+
+Este informe presenta todas las etapas realizadas: extracción y protección de datos,
+preprocesamiento, construcción del diccionario, muestreo, doble anotación,
+adjudicación, análisis descriptivo, representación TF-IDF, embeddings, validación
+cruzada, selección del modelo y clasificación del corpus completo.
+
+# Planteamiento del problema
+
+El grupo analizado contiene miles de mensajes con estructuras y finalidades muy
+distintas. Una misma palabra puede cambiar de significado según el contexto y una
+gran parte de los mensajes son consultas o anuncios sin una emoción explícita. Si
+se asigna una polaridad únicamente por coincidencia de palabras, pueden producirse
+falsos positivos, confundir neutralidad con falta de evidencia o ignorar expresiones
+locales.
+
+La pregunta central del trabajo es:
+
+> ¿Qué polaridades y emociones se expresan en el grupo de Telegram de Temporada de
+> Informática, y qué tan bien pueden identificarse mediante reglas, TF-IDF y
+> representaciones semánticas evaluadas contra un dataset humano propio?
+
+# Objetivos
+
+## Objetivo general
+
+Construir y evaluar un proceso reproducible de minería de texto y análisis de
+sentimientos para identificar polaridades, emociones y patrones agregados en el
+grupo de Telegram de Temporada de la Carrera de Informática.
+
+## Objetivos específicos
+
+1. Extraer y pseudonimizar los mensajes de la exportación de Telegram.
+2. Limpiar, normalizar y tokenizar el contenido textual.
+3. Construir un diccionario contextual de sentimientos y medir su cobertura.
+4. Diseñar una muestra estratificada para etiquetado humano.
+5. Etiquetar polaridad, emociones, intensidad, tema e ironía mediante dos anotadores.
+6. Medir el acuerdo entre anotadores y adjudicar los desacuerdos.
+7. Comparar reglas, TF-IDF, embeddings MiniLM y una representación híbrida.
+8. Evaluar los modelos sin fuga de textos duplicados mediante validación cruzada.
+9. Aplicar el modelo seleccionado al corpus completo y analizar resultados agregados.
+10. Documentar limitaciones, privacidad y pasos de reproducción.
+
+# Alcance, privacidad y consideraciones éticas
+
+La unidad de análisis es cada mensaje textual. Se excluyeron eventos de servicio y
+contenido multimedia sin transcripción. Los nombres fueron sustituidos por códigos
+como `P001`; sin embargo, el texto continúa siendo información privada, por lo que
+los CSV que lo contienen están excluidos del repositorio público.
+
+Las salidas del modelo final no guardan texto ni participante. Solo contienen el ID
+anónimo, variables temporales, predicciones y confianza. El análisis describe señales
+lingüísticas y no permite diagnosticar estados psicológicos. Tampoco debe utilizarse
+para evaluar individualmente a estudiantes.
+
+Aunque el grupo se denomina Temporada 2026, la exportación conserva historial desde
+2022. Por esa razón, el corpus permite comparación temporal entre gestiones, pero
+las conclusiones se limitan al chat analizado.
+
+# Fundamentos conceptuales
+
+## Minería de texto
+
+La minería de texto transforma documentos no estructurados en representaciones que
+pueden resumirse o utilizarse en algoritmos. Las etapas comunes incluyen limpieza,
+normalización, tokenización, eliminación de palabras vacías, construcción de
+frecuencias, n-gramas y matrices documento-término.
+
+## Polaridad y emociones
+
+La polaridad resume la orientación general del mensaje: positiva, negativa, neutra,
+mixta, ambigua o sin sentimiento. El proyecto también adopta un enfoque
+multietiqueta: un mensaje puede expresar más de una emoción, por ejemplo sorpresa y
+preocupación.
+
+## TF-IDF
+
+TF-IDF asigna mayor peso a los términos frecuentes dentro de un documento o grupo,
+pero relativamente poco frecuentes en el resto del corpus. Captura vocabulario
+local y expresiones específicas, aunque no representa por sí solo el significado
+semántico de una frase.
+
+## Embeddings MiniLM
+
+Los embeddings convierten cada texto en un vector denso. Se utilizó
+`paraphrase-multilingual-MiniLM-L12-v2`, un modelo multilingüe orientado a similitud
+semántica. Sus pesos permanecen congelados; sobre los vectores se entrena una
+regresión logística, reduciendo el riesgo de sobreajuste frente a un ajuste completo
+de una red neuronal con un dataset pequeño.
+
+## Métricas utilizadas
+
+- **Kappa de Cohen:** acuerdo entre anotadores descontando el acuerdo esperado por azar.
+- **Macro-F1:** promedio del F1 de todas las clases con el mismo peso; es central ante desbalance.
+- **Micro-F1:** combina todas las decisiones antes de calcular F1; favorece clases frecuentes.
+- **Exactitud:** proporción de casos completamente correctos.
+- **Hamming loss:** proporción de decisiones emocionales incorrectas en clasificación multietiqueta.
+
+# Metodología
+
+La organización general sigue las ideas de CRISP-DM: comprensión del problema,
+comprensión y preparación de datos, modelado, evaluación y presentación.
+
+## Extracción y organización del corpus
+
+Los archivos HTML exportados por Telegram se localizaron automáticamente y se
+ordenaron antes de extraer mensaje, fecha, autor y texto. Se eliminaron eventos de
+servicio y filas sin fecha válida. Después se generaron variables de gestión, mes,
+hora y día de la semana.
+
+```{r tabla-corpus, results='asis'}
+tibble::tibble(
+  Indicador = c(
+    "Mensajes del corpus", "Periodo", "Mensajes etiquetados",
+    "Documentos en la DFM", "Términos en la DFM"
+  ),
+  Resultado = c(
+    format(n_corpus, big.mark = ".", decimal.mark = ","),
+    paste(format(fecha_min, "%d/%m/%Y"), "a", format(fecha_max, "%d/%m/%Y")),
+    format(n_dataset, big.mark = ".", decimal.mark = ","),
+    format(matriz$documentos[[1]], big.mark = ".", decimal.mark = ","),
+    format(matriz$terminos[[1]], big.mark = ".", decimal.mark = ",")
+  )
+) |>
+  kable(caption = "Resumen de los datos utilizados")
+```
+
+## Preprocesamiento
+
+Se conservaron dos versiones del texto: una original para trazabilidad y una
+normalizada para minería. Se aplicaron minúsculas, tratamiento de URL, espacios,
+signos, stopwords y stemming en español. Se preservaron negaciones como “no”,
+“nunca” y “sin” porque pueden cambiar el sentido afectivo.
+
+Las librerías principales fueron:
+
+- `rvest` y `xml2` para extracción HTML;
+- `tm` para limpieza clásica del corpus;
+- `quanteda` y `SnowballC` para tokens, DFM, n-gramas y stemming;
+- `syuzhet` con léxico propio en español como puntaje auxiliar;
+- `scikit-learn` para TF-IDF, regresión logística y métricas;
+- `sentence-transformers` para embeddings MiniLM.
+
+## Diccionario de reglas
+
+Se partió de quince categorías del documento proporcionado en la materia. Después
+se construyó una ampliación contextual con variantes ortográficas, expresiones del
+chat, emojis y emoticonos. Cada coincidencia conserva evidencia, tipo de regla y
+confianza técnica.
+
+```{r cobertura-diccionario}
+cobertura |>
+  mutate(
+    version = recode(version, original_pdf = "Original", ampliado_v2 = "Ampliado"),
+    cobertura = percent(cobertura, accuracy = 0.1)
+  ) |>
+  select(Versión = version, Mensajes = mensajes, Clasificados = clasificados,
+         `Sin coincidencia` = sin_coincidencia, Cobertura = cobertura) |>
+  kable(caption = "Cobertura de las reglas")
+```
+
+El diccionario ampliado elevó la cobertura de 9,4% a 24,6%. Una mayor cobertura no
+implica automáticamente mayor exactitud; por eso las reglas se compararon con el
+dataset humano.
+
+## Muestreo y etiquetado manual
+
+Se seleccionaron 1.085 mensajes mediante estratificación por gestión y señal
+emocional, junto con un refuerzo de mensajes sin evidencia. El objetivo fue disponer
+de ejemplos de categorías poco frecuentes, no estimar directamente la prevalencia
+del corpus.
+
+Las variables manuales incluyeron presencia de sentimiento, polaridad, dos emociones
+posibles, intensidad, tema, ironía, confianza y observaciones. A y B etiquetaron de
+forma independiente sin consultar las sugerencias automáticas.
+
+## Validación, acuerdo y adjudicación
+
+Se verificaron categorías permitidas, campos obligatorios, duplicados e IDs. Los
+desacuerdos se almacenaron sin modificar las decisiones originales. Una tercera
+decisión adjudicó los casos necesarios y produjo `dataset_modelado_umsa.csv`.
+
+```{r control-calidad}
+control |>
+  transmute(
+    `Filas válidas A` = completas_anotador_a,
+    `Filas válidas B` = completas_anotador_b,
+    `Errores A` = errores_a,
+    `Errores B` = errores_b,
+    `Kappa polaridad` = round(kappa_polaridad, 3),
+    `Kappa emoción principal` = round(kappa_sentimiento, 3),
+    `Jaccard emociones` = round(jaccard_sentimientos, 3)
+  ) |>
+  kable(caption = "Control de calidad antes de la adjudicación")
+```
+
+```{r acuerdo-variables}
+acuerdo |>
+  mutate(
+    variable = recode(
+      variable,
+      tiene_sentimiento = "Presencia de sentimiento",
+      polaridad_manual = "Polaridad",
+      sentimiento_1 = "Emoción principal",
+      intensidad = "Intensidad",
+      tema = "Tema",
+      ironia = "Ironía",
+      confianza_anotacion = "Confianza"
+    ),
+    acuerdo = percent(acuerdo, accuracy = 0.1),
+    kappa = round(kappa, 3)
+  ) |>
+  select(Variable = variable, N = n, Acuerdo = acuerdo, Kappa = kappa) |>
+  kable(caption = "Acuerdo entre anotadores por variable")
+```
+
+El acuerdo fue moderado en polaridad y emoción principal. Esto confirma que el
+problema contiene ambigüedad real y justifica la adjudicación, en lugar de asumir
+que un único anotador constituye automáticamente la verdad.
+
+## Construcción y evaluación de modelos
+
+Se evaluaron las siguientes alternativas:
+
+1. Baseline mayoritario o sin emoción.
+2. Diccionario contextual.
+3. Regresión logística con TF-IDF.
+4. Regresión logística con embeddings MiniLM.
+5. Regresión logística híbrida con TF-IDF y MiniLM concatenados.
+
+Los textos idénticos se agruparon mediante el hash SHA-256 de su forma normalizada.
+Se empleó `StratifiedGroupKFold` con cinco folds: cada grupo aparece completamente
+en entrenamiento o en prueba, nunca en ambos. Las predicciones de todos los folds
+se concatenaron para obtener métricas fuera de muestra sobre las 1.085 filas.
+
+# Implementación y fragmentos de código
+
+Los fragmentos siguientes presentan las decisiones principales. El código completo
+se encuentra en los scripts numerados del proyecto.
+
+## Normalización de etiquetas en R
+
+```{r codigo-normalizacion, eval=FALSE, echo=TRUE}
+normalizar_etiqueta <- function(x) {
+  x |>
+    dplyr::coalesce("") |>
+    stringi::stri_trans_general("Latin-ASCII") |>
+    stringr::str_to_lower() |>
+    stringr::str_squish() |>
+    stringr::str_replace_all("[ /-]+", "_")
+}
+```
+
+## Separación agrupada de entrenamiento y prueba
+
+```{python codigo-folds, eval=FALSE, echo=TRUE}
+splitter = StratifiedGroupKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=20261026,
+)
+
+splits = splitter.split(
+    data,
+    data["polaridad_objetivo"],
+    groups=data["text_group"],
+)
+```
+
+## Representación híbrida
+
+```{python codigo-hibrido, eval=FALSE, echo=TRUE}
+hybrid_train = sparse.hstack(
+    [tfidf_train, sparse.csr_matrix(embedding_train)],
+    format="csr",
+)
+
+classifier = LogisticRegression(
+    max_iter=3000,
+    class_weight="balanced",
+    random_state=20261026,
+)
+classifier.fit(hybrid_train, y_train)
+```
+
+## Clasificación multietiqueta
+
+```{python codigo-multietiqueta, eval=FALSE, echo=TRUE}
+emotion_classifier = OneVsRestClassifier(
+    LogisticRegression(class_weight="balanced", max_iter=3000)
+)
+emotion_classifier.fit(x_train, y_emotions)
+emotion_prediction = emotion_classifier.predict(x_test)
+```
+
+## Protección de la salida final
+
+```{python codigo-privacidad, eval=FALSE, echo=TRUE}
+predictions = pd.DataFrame({
+    "message_id": corpus["message_id"],
+    "gestion": corpus["gestion"],
+    "fecha": corpus["fecha"],
+    "polaridad_predicha": polarity_prediction,
+    "confianza_polaridad": polarity_probability.max(axis=1),
+    "emociones_predichas": emotion_labels,
+})
+# No se exportan las columnas texto ni participante.
+```
+
+# Resultados
+
+## Distribución de la referencia final
+
+```{r distribucion-polaridad-final}
+dataset |>
+  count(polaridad_objetivo, sort = TRUE) |>
+  mutate(Porcentaje = percent(n / sum(n), accuracy = 0.1)) |>
+  select(Polaridad = polaridad_objetivo, Mensajes = n, Porcentaje) |>
+  kable(caption = "Polaridad en el dataset adjudicado")
+```
+
+```{r distribucion-emociones-final}
+dataset |>
+  select(sentimientos_objetivo) |>
+  separate_rows(sentimientos_objetivo, sep = ";") |>
+  count(sentimientos_objetivo, sort = TRUE) |>
+  mutate(Porcentaje = percent(n / n_dataset, accuracy = 0.1)) |>
+  select(Emoción = sentimientos_objetivo, Mensajes = n, Porcentaje) |>
+  kable(caption = "Emociones en el dataset adjudicado")
+```
+
+La clase más frecuente es `sin_sentimiento`. Las emociones con soporte suficiente
+para el modelo fueron admiración, alegría, confusión, curiosidad, decepción, enojo,
+esperanza, gratitud, preocupación y tristeza. Esto cumple el requisito de trabajar
+con al menos ocho emociones.
+
+## Comparación de modelos
+
+```{r comparacion-modelos}
+metricas_cv |>
+  mutate(
+    Tarea = recode(task, polaridad = "Polaridad", emociones_multietiqueta = "Emociones"),
+    Modelo = recode(
+      model,
+      baseline_mayoritario = "Mayoritaria",
+      baseline_sin_emocion = "Sin emoción",
+      diccionario_reglas = "Diccionario",
+      tfidf_logistica = "TF-IDF",
+      minilm_logistica = "MiniLM",
+      hibrido_tfidf_minilm = "TF-IDF + MiniLM"
+    ),
+    `Macro-F1` = round(macro_f1, 3),
+    `Micro-F1` = round(micro_f1, 3),
+    Exactitud = round(accuracy, 3),
+    `Hamming loss` = round(hamming_loss, 3)
+  ) |>
+  select(Tarea, Modelo, `Macro-F1`, `Micro-F1`, Exactitud, `Hamming loss`) |>
+  kable(caption = "Métricas agregadas de predicciones fuera de muestra")
+```
+
+```{r figura-comparacion, fig.cap='Comparación de macro-F1 entre modelos', out.width='92%'}
+knitr::include_graphics(
+  ruta("resultados/validacion_cruzada/graficos/01_comparacion_macro_f1.png"),
+  rel_path = FALSE
+)
+```
+
+El híbrido alcanza macro-F1 de 0,393 en polaridad y 0,375 en emociones. MiniLM
+supera a TF-IDF en polaridad, lo que demuestra la utilidad de la representación
+semántica; a su vez, TF-IDF aporta vocabulario local complementario y mejora el
+resultado cuando ambas representaciones se combinan.
+
+```{r estabilidad-folds}
+resumen_folds |>
+  filter(model == "hibrido_tfidf_minilm") |>
+  mutate(
+    Tarea = recode(task, polaridad = "Polaridad", emociones_multietiqueta = "Emociones"),
+    `Macro-F1 promedio` = round(macro_f1_mean, 3),
+    `Desviación estándar` = round(macro_f1_sd, 3),
+    `Micro-F1 promedio` = round(micro_f1_mean, 3)
+  ) |>
+  select(Tarea, Folds = folds, `Macro-F1 promedio`, `Desviación estándar`, `Micro-F1 promedio`) |>
+  kable(caption = "Estabilidad del modelo híbrido entre folds")
+```
+
+## Resultados por clase
+
+```{r resultados-polaridad-clase}
+metricas_clase |>
+  filter(task == "polaridad", model == "hibrido_tfidf_minilm") |>
+  mutate(across(c(precision, recall, f1), ~ round(.x, 3))) |>
+  select(Polaridad = class, Soporte = support, Precisión = precision,
+         Exhaustividad = recall, F1 = f1) |>
+  kable(caption = "Desempeño del híbrido por polaridad")
+```
+
+```{r figura-confusion, fig.cap='Matriz de confusión fuera de muestra para polaridad', out.width='80%'}
+knitr::include_graphics(
+  ruta("resultados/validacion_cruzada/graficos/02_matriz_confusion_polaridad.png"),
+  rel_path = FALSE
+)
+```
+
+Las categorías mixta y ambigua presentan mayor dificultad por su menor frecuencia
+y por la coexistencia o incertidumbre de señales. Las clases negativa, positiva,
+neutra y sin sentimiento disponen de más ejemplos y muestran resultados superiores.
+
+```{r resultados-emociones-clase}
+metricas_clase |>
+  filter(task == "emociones_multietiqueta", model == "hibrido_tfidf_minilm") |>
+  mutate(across(c(precision, recall, f1), ~ round(.x, 3))) |>
+  select(Emoción = class, Soporte = support, Precisión = precision,
+         Exhaustividad = recall, F1 = f1) |>
+  arrange(desc(F1)) |>
+  kable(caption = "Desempeño del híbrido por emoción")
+```
+
+```{r figura-emociones-f1, fig.cap='F1 fuera de muestra por emoción', out.width='82%'}
+knitr::include_graphics(
+  ruta("resultados/validacion_cruzada/graficos/03_f1_por_emocion.png"),
+  rel_path = FALSE
+)
+```
+
+## Aplicación al corpus completo
+
+Después de seleccionar el híbrido, se entrenó con las 1.085 filas y se clasificaron
+los 21.546 mensajes. Los resultados siguientes son predicciones del modelo, no
+proporciones humanas observadas directamente.
+
+```{r polaridad-corpus}
+polaridad_corpus |>
+  mutate(Porcentaje = percent(porcentaje, accuracy = 0.1)) |>
+  select(Polaridad = polaridad_predicha, Mensajes = mensajes, Porcentaje) |>
+  kable(caption = "Polaridad predicha en el corpus completo")
+```
+
+```{r figura-polaridad-corpus, fig.cap='Distribución de polaridad predicha', out.width='88%'}
+knitr::include_graphics(
+  ruta("resultados/modelo_final/graficos/01_polaridad_corpus.png"),
+  rel_path = FALSE
+)
+```
+
+```{r emociones-corpus}
+emociones_corpus |>
+  mutate(Porcentaje = percent(porcentaje_mensajes, accuracy = 0.1)) |>
+  select(Emoción = emocion_predicha, Mensajes = mensajes, Porcentaje) |>
+  kable(caption = "Emociones predichas en el corpus completo")
+```
+
+```{r figura-emociones-corpus, fig.cap='Distribución de emociones predichas', out.width='88%'}
+knitr::include_graphics(
+  ruta("resultados/modelo_final/graficos/02_emociones_corpus.png"),
+  rel_path = FALSE
+)
+```
+
+El 41,7% fue clasificado sin sentimiento y 23,5% como neutral. Entre las emociones
+modeladas destacan curiosidad, preocupación, tristeza, confusión y decepción. La
+suma de emociones puede superar el total porque la tarea es multietiqueta.
+
+La mediana de la probabilidad máxima es aproximadamente 0,423 en polaridad y 0,558
+en emociones. Por tanto, existe un conjunto importante de predicciones inciertas;
+el uso apropiado es agregado y exploratorio.
+
+# Discusión
+
+Los resultados muestran que ninguna representación resuelve por sí sola el lenguaje
+del chat. El diccionario es trazable y obtiene un resultado competitivo, especialmente
+porque la muestra incluye señales utilizadas durante el muestreo. TF-IDF reconoce
+vocabulario propio del contexto universitario, mientras que MiniLM representa
+semejanzas semánticas incluso cuando las palabras exactas cambian. El desempeño del
+híbrido confirma que ambas fuentes de información son complementarias.
+
+La exactitud del baseline sin emoción puede parecer alta en la tarea multietiqueta,
+pero su macro-F1 es cero porque nunca reconoce una emoción. Este caso demuestra por
+qué la exactitud sola es inadecuada ante clases desbalanceadas.
+
+El acuerdo moderado entre anotadores también es un resultado relevante: la emoción
+expresada no siempre es inequívoca. La adjudicación mejora la consistencia del objetivo,
+pero no elimina la ambigüedad inherente al lenguaje. Por esa razón se reportan
+matrices, métricas por clase y variación entre folds, no únicamente un valor global.
+
+# Limitaciones
+
+1. La muestra fue enriquecida usando señales del diccionario y no es aleatoria simple.
+2. Algunas emociones tienen pocos ejemplos; las categorías con soporte menor a veinte no se modelaron.
+3. Los mensajes se procesan individualmente y no incorporan toda la conversación previa.
+4. No se analiza contenido de audio, imágenes, videos o stickers sin texto.
+5. Ironía, negaciones complejas, abreviaciones y errores ortográficos siguen siendo difíciles.
+6. Los embeddings provienen de un modelo general multilingüe, no ajustado específicamente a lenguaje universitario boliviano.
+7. Las probabilidades del modelo no equivalen a certeza ni a diagnóstico psicológico.
+8. Las estimaciones del corpus completo deben presentarse como exploratorias por el diseño de la muestra.
+
+# Conclusiones
+
+1. Se construyó un pipeline reproducible que transforma una exportación de Telegram en un corpus pseudonimizado, datos estructurados, reglas trazables y resultados agregados.
+2. Se obtuvo un dataset propio de 1.085 mensajes con doble anotación, control de calidad y adjudicación completa.
+3. El acuerdo moderado evidencia que la clasificación emocional requiere criterios explícitos y revisión de desacuerdos.
+4. El diccionario ampliado incrementó la cobertura de 9,4% a 24,6%, pero continuó limitado por contexto y vocabulario.
+5. MiniLM mejoró la representación semántica respecto de TF-IDF en polaridad.
+6. La combinación TF-IDF+MiniLM obtuvo el mejor resultado: macro-F1 0,393 en polaridad y 0,375 en diez emociones.
+7. Se clasificaron los 21.546 mensajes sin incluir texto ni participantes en la salida final.
+8. Los resultados permiten estudiar tendencias agregadas, pero no evaluar o diagnosticar individuos.
+
+# Recomendaciones
+
+1. Ampliar el dataset con ejemplos de emociones poco frecuentes.
+2. Incorporar contexto conversacional de forma controlada y pseudonimizada.
+3. Revisar manualmente una muestra de predicciones de baja confianza.
+4. Evaluar umbrales específicos por emoción usando validación interna.
+5. Repetir la validación cuando se añadan nuevas gestiones o cambie el vocabulario.
+6. Mantener separados los datos privados y los productos agregados de presentación.
+7. Confirmar con la docente la nota ambigua del documento base sobre posibles reemplazos de categorías.
+
+# Reproducibilidad
+
+El flujo principal se ejecuta desde la raíz del proyecto:
+
+```{bash comandos-reproduccion, eval=FALSE, echo=TRUE}
+Rscript scripts/01_ejecutar_analisis.R
+Rscript scripts/02_generar_dataset_manual.R
+# Completar las anotaciones A y B
+Rscript scripts/06_corregir_etiquetado_b.R
+Rscript scripts/03_validar_dataset_manual.R
+# Completar la adjudicación de desacuerdos
+Rscript scripts/07_consolidar_adjudicaciones.R
+Rscript scripts/04_mineria_descriptiva.R
+Rscript scripts/05_preprocesamiento_librerias.R
+
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  .venv-embeddings/bin/python scripts/09_validacion_cruzada.py
+
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  .venv-embeddings/bin/python scripts/10_clasificar_corpus.py --batch-size 256
+
+Rscript -e 'rmarkdown::render("informe/Informe_final_Data_Mining.Rmd")'
+```
+
+# Referencias
+
+- Benoit, K., Watanabe, K., Wang, H., Nulty, P., Obeng, A., Müller, S. y Matsuo, A. (2018). *quanteda: An R package for the quantitative analysis of textual data*. Journal of Open Source Software, 3(30), 774.
+- Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C. y Wirth, R. (2000). *CRISP-DM 1.0: Step-by-step data mining guide*.
+- Pedregosa, F. et al. (2011). *Scikit-learn: Machine Learning in Python*. Journal of Machine Learning Research, 12, 2825–2830.
+- Reimers, N. y Gurevych, I. (2019). *Sentence-BERT: Sentence embeddings using Siamese BERT-networks*. Proceedings of EMNLP-IJCNLP.
+- Silge, J. y Robinson, D. (2017). *Text Mining with R: A Tidy Approach*. O’Reilly Media.
+- Documento de sentimientos proporcionado en la materia Data Mining (`sentimientos_documento.pdf`).
+
+# Anexos
+
+## Scripts principales
+
+| Script                            | Función                                                     |
+| --------------------------------- | ----------------------------------------------------------- |
+| `01_ejecutar_analisis.R`          | Extracción, pseudonimización, reglas y resultados generales |
+| `02_generar_dataset_manual.R`     | Muestra y plantillas de anotación                           |
+| `03_validar_dataset_manual.R`     | Validación, acuerdo y plantillas de desacuerdo              |
+| `04_mineria_descriptiva.R`        | Frecuencias, TF-IDF, bigramas y asociaciones                |
+| `05_preprocesamiento_librerias.R` | Evidencia de `tm`, `quanteda`, stemming y `syuzhet`         |
+| `07_consolidar_adjudicaciones.R`  | Construcción del objetivo final                             |
+| `08_modelo_embeddings.py`         | Benchmark exploratorio                                      |
+| `09_validacion_cruzada.py`        | Evaluación final de cinco folds                             |
+| `10_clasificar_corpus.py`         | Entrenamiento y predicción del corpus completo              |
+
+## Productos principales
+
+| Archivo                     | Contenido                                   |
+| --------------------------- | ------------------------------------------- |
+| `dataset_modelado_umsa.csv` | Referencia final adjudicada                 |
+| `comparacion_modelos.csv`   | Métricas fuera de muestra                   |
+| `metricas_por_fold.csv`     | Resultados en cada partición                |
+| `metricas_por_clase.csv`    | Precisión, exhaustividad y F1 por categoría |
+| `predicciones_corpus.csv`   | Predicciones sin texto ni participante      |
+| `resumen_polaridad.csv`     | Polaridad agregada del corpus               |
+| `resumen_emociones.csv`     | Emociones agregadas del corpus              |

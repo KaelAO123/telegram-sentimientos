@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dashboard académico del análisis de sentimientos y emociones del grupo de Telegram Temporada 2026.">
+  <title>Dashboard | Sentimientos y emociones — Temporada 2026</title>
+  <style>
+    :root {
+      --navy: #10233f;
+      --navy-2: #183659;
+      --teal: #07847c;
+      --cyan: #1bb5a7;
+      --orange: #f59e0b;
+      --red: #e25353;
+      --blue: #3b82f6;
+      --violet: #8b5cf6;
+      --ink: #172033;
+      --muted: #667085;
+      --line: #e3e8ef;
+      --canvas: #f5f7fb;
+      --paper: #fff;
+      --shadow: 0 14px 36px rgba(16, 35, 63, .08);
+      --radius: 18px;
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--canvas);
+      font: 15px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 258px minmax(0, 1fr); }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; z-index: 20;
+      display: flex; flex-direction: column; padding: 26px 18px 20px;
+      color: #fff; background:
+        radial-gradient(circle at 20% 5%, rgba(27,181,167,.30), transparent 26%),
+        linear-gradient(165deg, #102a48 0%, #0d1e36 100%);
+    }
+    .brand { display: flex; gap: 12px; align-items: center; padding: 0 8px 27px; }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center; flex: 0 0 auto;
+      border-radius: 13px; color: #092539; background: #6ee7d8; font-weight: 900;
+      box-shadow: 0 8px 24px rgba(110,231,216,.22);
+    }
+    .brand strong { display: block; font-size: 15px; line-height: 1.15; }
+    .brand small { color: #a9bdd2; font-size: 11px; }
+    .nav-label {
+      margin: 0 10px 8px; color: #7791aa; font-size: 10px; font-weight: 800;
+      letter-spacing: .14em; text-transform: uppercase;
+    }
+    .nav { display: grid; gap: 5px; }
+    .nav-button {
+      width: 100%; display: flex; align-items: center; gap: 11px; padding: 11px 13px;
+      border: 0; border-radius: 11px; text-align: left; color: #bfd0e1; background: transparent;
+      transition: .18s ease;
+    }
+    .nav-button:hover { color: #fff; background: rgba(255,255,255,.07); }
+    .nav-button.active { color: #fff; background: rgba(27,181,167,.20); box-shadow: inset 3px 0 #5eead4; }
+    .nav-icon { width: 24px; text-align: center; font-size: 17px; }
+    .sidebar-note {
+      margin-top: auto; padding: 15px; border: 1px solid rgba(255,255,255,.10);
+      border-radius: 13px; color: #b8c8d8; background: rgba(255,255,255,.04); font-size: 11px;
+    }
+    .sidebar-note strong { display: block; margin-bottom: 4px; color: #fff; }
+
+    .workspace { min-width: 0; }
+    .topbar {
+      position: sticky; top: 0; z-index: 15; min-height: 74px; display: flex;
+      align-items: center; justify-content: space-between; gap: 18px; padding: 14px 34px;
+      border-bottom: 1px solid rgba(227,232,239,.85); background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+    }
+    .topbar-title { min-width: 0; }
+    .topbar-title p { margin: 0; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .topbar-title h1 { margin: 1px 0 0; overflow: hidden; font-size: 20px; line-height: 1.2; white-space: nowrap; text-overflow: ellipsis; }
+    .toolbar { display: flex; align-items: center; gap: 9px; }
+    .field { display: flex; align-items: center; gap: 8px; }
+    .field label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    select, .tool-button {
+      min-height: 39px; border: 1px solid #d6dde7; border-radius: 10px; color: var(--ink); background: #fff;
+    }
+    select { padding: 0 34px 0 12px; }
+    .tool-button { padding: 0 13px; font-weight: 700; transition: .18s ease; }
+    .tool-button:hover { border-color: var(--teal); color: var(--teal); }
+    .menu-button { display: none; width: 40px; padding: 0; }
+
+    main { max-width: 1500px; margin: 0 auto; padding: 30px 34px 60px; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .page-heading { display: flex; justify-content: space-between; gap: 28px; align-items: flex-end; margin-bottom: 24px; }
+    .eyebrow { margin: 0 0 6px; color: var(--teal); font-size: 11px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+    .page-heading h2 { margin: 0; color: var(--navy); font-size: clamp(25px, 3vw, 36px); line-height: 1.12; letter-spacing: -.035em; }
+    .page-heading .lead { max-width: 690px; margin: 9px 0 0; color: var(--muted); }
+    .scope-pill {
+      flex: 0 0 auto; padding: 8px 12px; border: 1px solid #bde7e1; border-radius: 999px;
+      color: #086d67; background: #eafaf7; font-size: 12px; font-weight: 800;
+    }
+
+    .grid { display: grid; gap: 18px; }
+    .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .two-col { grid-template-columns: minmax(0, 1.12fr) minmax(320px, .88fr); }
+    .equal-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card {
+      min-width: 0; padding: 22px; border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--paper); box-shadow: var(--shadow);
+    }
+    .kpi { position: relative; overflow: hidden; min-height: 137px; }
+    .kpi::after { content: ""; position: absolute; inset: auto -28px -43px auto; width: 110px; height: 110px; border-radius: 50%; background: var(--kpi-wash, #eaf8f6); }
+    .kpi-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .kpi-badge { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; color: var(--kpi-color, var(--teal)); background: var(--kpi-wash, #eaf8f6); }
+    .kpi-value { position: relative; z-index: 1; margin-top: 13px; color: var(--navy); font-size: clamp(26px, 3vw, 36px); font-weight: 900; letter-spacing: -.04em; }
+    .kpi-help { position: relative; z-index: 1; color: var(--muted); font-size: 11px; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .card-title { margin: 0; color: var(--navy); font-size: 17px; line-height: 1.25; }
+    .card-subtitle { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .tag { flex: 0 0 auto; padding: 5px 9px; border-radius: 7px; color: #075e59; background: #e9f8f5; font-size: 10px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
+    .mt { margin-top: 18px; }
+
+    .donut-layout { display: grid; grid-template-columns: 205px minmax(0, 1fr); gap: 24px; align-items: center; }
+    .donut {
+      position: relative; width: 190px; aspect-ratio: 1; margin: auto; border-radius: 50%;
+      background: conic-gradient(#ddd 0 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.03);
+    }
+    .donut::after { content: ""; position: absolute; inset: 28px; border-radius: 50%; background: #fff; }
+    .donut-center { position: absolute; inset: 0; z-index: 1; display: grid; place-content: center; text-align: center; pointer-events: none; }
+    .donut-center strong { color: var(--navy); font-size: 25px; line-height: 1; }
+    .donut-center span { color: var(--muted); font-size: 10px; }
+    .legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 17px; }
+    .legend-item { display: grid; grid-template-columns: 9px 1fr auto; gap: 7px; align-items: center; font-size: 12px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .legend-item span { color: var(--muted); }
+    .legend-item strong { color: var(--navy); }
+
+    .bars { display: grid; gap: 13px; }
+    .bar-row { display: grid; grid-template-columns: 125px minmax(120px, 1fr) 100px; gap: 12px; align-items: center; }
+    .bar-label { overflow: hidden; color: #3c485c; font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { height: 10px; overflow: hidden; border-radius: 99px; background: #edf1f5; }
+    .bar-fill { height: 100%; min-width: 2px; border-radius: inherit; background: var(--bar-color, var(--teal)); transition: width .35s ease; }
+    .bar-value { text-align: right; color: var(--navy); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .bar-value strong { font-size: 12px; }
+
+    .insight {
+      padding: 17px 18px; border-left: 4px solid var(--teal); border-radius: 0 12px 12px 0;
+      color: #3a4a5e; background: #f0faf8; font-size: 13px;
+    }
+    .insight strong { color: #075e59; }
+    .notice { padding: 15px 17px; border: 1px solid #f3d69c; border-radius: 12px; color: #6f5014; background: #fffaee; font-size: 12px; }
+
+    .stack-list { display: grid; gap: 17px; }
+    .stack-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) 62px; gap: 11px; align-items: center; }
+    .stack-year { color: var(--navy); font-size: 12px; font-weight: 900; }
+    .stack { display: flex; height: 19px; overflow: hidden; border-radius: 6px; background: #edf1f5; }
+    .stack span { min-width: 1px; height: 100%; }
+    .stack-total { color: var(--muted); text-align: right; font-size: 11px; font-variant-numeric: tabular-nums; }
+
+    .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 13px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 11px 13px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+    th:first-child, td:first-child { text-align: left; }
+    th { color: #506079; background: #f7f9fb; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover td { background: #fafcfb; }
+
+    .model-row { display: grid; grid-template-columns: 180px 1fr 58px; gap: 12px; align-items: center; margin: 14px 0; }
+    .model-name { color: #3a4658; font-size: 12px; font-weight: 700; }
+    .model-track { height: 13px; overflow: hidden; border-radius: 99px; background: #edf1f5; }
+    .model-fill { height: 100%; border-radius: inherit; background: #9aacbd; }
+    .model-row.winner .model-fill { background: linear-gradient(90deg, var(--teal), #23c7b7); }
+    .model-row.winner .model-name, .model-row.winner .model-value { color: #08756e; font-weight: 900; }
+    .model-value { text-align: right; font-size: 12px; font-variant-numeric: tabular-nums; }
+
+    .quality-score { display: grid; grid-template-columns: 100px 1fr; gap: 20px; align-items: center; }
+    .score-ring {
+      width: 96px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%;
+      color: var(--navy); background: conic-gradient(var(--teal) var(--score), #e8edf2 0);
+    }
+    .score-ring::before { content: attr(data-value); width: 72px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: #fff; font-size: 19px; font-weight: 900; }
+    .quality-score h4 { margin: 0 0 4px; color: var(--navy); }
+    .quality-score p { margin: 0; color: var(--muted); font-size: 12px; }
+    .checklist { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .checklist li { position: relative; padding-left: 28px; color: #47566a; font-size: 13px; }
+    .checklist li::before { content: "✓"; position: absolute; left: 0; top: 0; width: 19px; height: 19px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--teal); font-size: 11px; font-weight: 900; }
+    .footer { margin-top: 25px; color: #7b8798; font-size: 11px; text-align: center; }
+
+    @media (max-width: 1050px) {
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .two-col, .equal-col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 800px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; inset: 0 auto 0 0; width: 258px; transform: translateX(-105%); transition: transform .22s ease; box-shadow: 18px 0 45px rgba(0,0,0,.24); }
+      .sidebar.open { transform: translateX(0); }
+      .topbar { padding: 12px 18px; }
+      .menu-button { display: block; }
+      .topbar-title p { display: none; }
+      main { padding: 24px 18px 48px; }
+      .page-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+      .tool-button .wide-label, .field label { display: none; }
+    }
+    @media (max-width: 570px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .donut-layout { grid-template-columns: 1fr; }
+      .legend { grid-template-columns: 1fr 1fr; }
+      .bar-row { grid-template-columns: 94px 1fr 70px; gap: 8px; }
+      .model-row { grid-template-columns: 120px 1fr 44px; gap: 8px; }
+      .card { padding: 18px; }
+      .topbar-title h1 { font-size: 16px; }
+    }
+    @media print {
+      body { background: #fff; font-size: 11px; }
+      .shell { display: block; }
+      .sidebar, .topbar, .no-print { display: none !important; }
+      main { max-width: none; padding: 0; }
+      .view { display: block !important; break-before: page; }
+      .view:first-child { break-before: auto; }
+      .card { break-inside: avoid; box-shadow: none; }
+      .page-heading { margin-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">DM</div>
+        <div><strong>Sentimientos UMSA</strong><small>Proyecto de Data Mining</small></div>
+      </div>
+      <p class="nav-label">Explorar</p>
+      <nav class="nav">
+        <button class="nav-button active" data-view="resumen"><span class="nav-icon">⌂</span>Resumen ejecutivo</button>
+        <button class="nav-button" data-view="polaridad"><span class="nav-icon">◐</span>Polaridad</button>
+        <button class="nav-button" data-view="emociones"><span class="nav-icon">♡</span>Emociones</button>
+        <button class="nav-button" data-view="modelos"><span class="nav-icon">▥</span>Modelos</button>
+        <button class="nav-button" data-view="calidad"><span class="nav-icon">✓</span>Calidad y límites</button>
+      </nav>
+      <div class="sidebar-note">
+        <strong>Lectura responsable</strong>
+        Resultados exploratorios y agregados. No representan diagnósticos ni evaluaciones individuales.
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button class="tool-button menu-button" id="menuButton" aria-label="Abrir menú">☰</button>
+        <div class="topbar-title">
+          <p>Telegram · Temporada 2026 · Carrera de Informática</p>
+          <h1 id="topTitle">Resumen ejecutivo</h1>
+        </div>
+        <div class="toolbar">
+          <div class="field">
+            <label for="yearSelect">Gestión</label>
+            <select id="yearSelect" aria-label="Filtrar por gestión">
+              <option value="all">Todas (2022–2026)</option>
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+            </select>
+          </div>
+          <button class="tool-button no-print" id="downloadButton" title="Descargar los datos visibles en CSV">⇩ <span class="wide-label">CSV</span></button>
+          <button class="tool-button no-print" id="printButton" title="Imprimir o guardar como PDF">⎙ <span class="wide-label">PDF</span></button>
+        </div>
+      </header>
+
+      <main>
+        <section class="view active" id="view-resumen" data-title="Resumen ejecutivo">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Panorama general</p>
+              <h2>¿Qué expresa la conversación?</h2>
+              <p class="lead">Vista compacta del corpus, sus predicciones y el desempeño del modelo final. Use el filtro de gestión para comparar periodos.</p>
+            </div>
+            <span class="scope-pill scope-label">Todas las gestiones</span>
+          </div>
+
+          <div class="grid kpi-grid">
+            <article class="card kpi"><div class="kpi-label">Mensajes analizados <span class="kpi-badge">▤</span></div><div class="kpi-value js-total">21.546</div><div class="kpi-help">Corpus anonimizado y depurado</div></article>
+            <article class="card kpi" style="--kpi-color:#3b82f6;--kpi-wash:#edf4ff"><div class="kpi-label">Muestra manual <span class="kpi-badge">✎</span></div><div class="kpi-value">1.085</div><div class="kpi-help">Dos anotadores + adjudicación</div></article>
+            <article class="card kpi" style="--kpi-color:#8b5cf6;--kpi-wash:#f3efff"><div class="kpi-label">Emociones modeladas <span class="kpi-badge">♡</span></div><div class="kpi-value">10</div><div class="kpi-help">Clasificación multietiqueta</div></article>
+            <article class="card kpi" style="--kpi-color:#f59e0b;--kpi-wash:#fff7e5"><div class="kpi-label">Mejor macro-F1 <span class="kpi-badge">★</span></div><div class="kpi-value">0,393</div><div class="kpi-help">Polaridad · modelo híbrido</div></article>
+          </div>
+
+          <div class="grid two-col mt">
+            <article class="card">
+              <div class="card-header"><div><h3 class="card-title">Distribución de polaridad</h3><p class="card-subtitle">Una categoría principal por mensaje</p></div><span class="tag scope-short">2022–2026</span></div>
+              <div class="donut-layout"><div class="donut" id="overviewDonut"><div class="donut-center"><strong class="js-total">21.546</strong><span>mensajes</span></div></div><div class="legend" id="overviewLegend"></div></div>
+            </article>
+            <article class="card">
+              <div class="card-header"><div><h3 class="card-title">Emociones más frecuentes</h3><p class="card-subtitle">Presencia estimada sobre los mensajes del periodo</p></div><span class="tag">Multietiqueta</span></div>
+              <div class="bars" id="overviewEmotionBars"></div>
+            </article>
+          </div>
+          <div class="insight mt" id="summaryInsight"><strong>Lectura principal.</strong> Cargando interpretación…</div>
+        </section>
+
+        <section class="view" id="view-polaridad" data-title="Análisis de polaridad">
+          <div class="page-heading"><div><p class="eyebrow">Orientación afectiva</p><h2>Polaridad de los mensajes</h2><p class="lead">Cada mensaje recibe una sola categoría. “Sin sentimiento” indica ausencia de señal afectiva suficiente, no una emoción negativa.</p></div><span class="scope-pill scope-label">Todas las gestiones</span></div>
+          <div class="grid two-col">
+            <article class="card"><div class="card-header"><div><h3 class="card-title">Composición del periodo</h3><p class="card-subtitle">Conteo y porcentaje dentro de la gestión seleccionada</p></div></div><div class="bars" id="polarityBars"></div></article>
+            <article class="card"><div class="card-header"><div><h3 class="card-title">Comparación anual</h3><p class="card-subtitle">Participación relativa de las seis categorías</p></div><span class="tag">100 % por fila</span></div><div class="stack-list" id="yearStacks"></div><div class="legend mt" id="stackLegend"></div></article>
+          </div>
+          <article class="card mt"><div class="card-header"><div><h3 class="card-title">Detalle numérico</h3><p class="card-subtitle">Tabla preparada para lectura y exportación</p></div></div><div class="table-wrap"><table><thead><tr><th>Polaridad</th><th>Mensajes</th><th>Porcentaje</th></tr></thead><tbody id="polarityTable"></tbody></table></div></article>
+          <div class="notice mt"><strong>Cómo interpretar:</strong> la predominancia de “sin sentimiento” y “neutra” es coherente con un grupo académico donde abundan avisos, fechas, enlaces y coordinación. Las categorías emocionales deben leerse como tendencias del corpus, no como estados psicológicos de sus participantes.</div>
+        </section>
+
+        <section class="view" id="view-emociones" data-title="Análisis de emociones">
+          <div class="page-heading"><div><p class="eyebrow">Clasificación multietiqueta</p><h2>Diez emociones del proyecto</h2><p class="lead">Un mismo mensaje puede expresar más de una emoción. Por eso los conteos pueden superar el número de mensajes y los porcentajes no suman 100 %.</p></div><span class="scope-pill scope-label">Todas las gestiones</span></div>
+          <div class="grid two-col">
+            <article class="card"><div class="card-header"><div><h3 class="card-title">Frecuencia estimada</h3><p class="card-subtitle">Se excluye “sin sentimiento” para comparar las diez emociones</p></div><span class="tag">10 clases</span></div><div class="bars" id="emotionBars"></div></article>
+            <article class="card"><div class="card-header"><div><h3 class="card-title">Capacidad por emoción</h3><p class="card-subtitle">F1 fuera de muestra del modelo híbrido</p></div><span class="tag">CV agrupada</span></div><div class="bars" id="emotionF1Bars"></div></article>
+          </div>
+          <article class="card mt"><div class="card-header"><div><h3 class="card-title">Tabla de resultados emocionales</h3><p class="card-subtitle">Conteos del corpus y desempeño medido en las 1.085 anotaciones</p></div></div><div class="table-wrap"><table><thead><tr><th>Emoción</th><th>Mensajes</th><th>% de mensajes</th><th>Soporte prueba</th><th>Precisión</th><th>Recall</th><th>F1</th></tr></thead><tbody id="emotionTable"></tbody></table></div></article>
+          <div class="notice mt"><strong>Precaución:</strong> gratitud y admiración muestran buenos F1, mientras que confusión, enojo, esperanza y tristeza tienen menor estabilidad. La escasez de ejemplos y el lenguaje conversacional explican buena parte de esta diferencia.</div>
+        </section>
+
+        <section class="view" id="view-modelos" data-title="Comparación de modelos">
+          <div class="page-heading"><div><p class="eyebrow">Validación cruzada agrupada</p><h2>¿Por qué se eligió el modelo híbrido?</h2><p class="lead">Se compararon reglas, palabras y representaciones semánticas bajo las mismas cinco particiones, agrupando textos normalizados para evitar fuga de información.</p></div><span class="scope-pill">1.085 casos manuales</span></div>
+          <div class="grid equal-col">
+            <article class="card"><div class="card-header"><div><h3 class="card-title">Macro-F1 de polaridad</h3><p class="card-subtitle">Promedio equilibrado entre seis clases</p></div><span class="tag">Mejor: 0,393</span></div><div id="polarityModels"></div></article>
+            <article class="card"><div class="card-header"><div><h3 class="card-title">Macro-F1 de emociones</h3><p class="card-subtitle">Promedio equilibrado entre diez etiquetas</p></div><span class="tag">Mejor: 0,375</span></div><div id="emotionModels"></div></article>
+          </div>
+          <div class="grid equal-col mt">
+            <article class="card"><h3 class="card-title">Representación final</h3><ul class="checklist mt"><li>TF-IDF captura vocabulario local, abreviaciones y expresiones frecuentes.</li><li>MiniLM aporta similitud semántica entre frases redactadas de forma distinta.</li><li>La concatenación híbrida conserva ambas fuentes de información.</li><li>Regresión logística aporta una base reproducible y probabilidades por clase.</li></ul></article>
+            <article class="card"><h3 class="card-title">Qué demuestra la evaluación</h3><div class="insight mt"><strong>Resultado:</strong> el híbrido logró el mayor macro-F1 en ambas tareas. La mejora es real frente al baseline, pero las cifras moderadas muestran que el problema sigue siendo difícil y que no conviene presentar las predicciones como infalibles.</div></article>
+          </div>
+          <article class="card mt"><div class="card-header"><div><h3 class="card-title">Métricas comparables</h3><p class="card-subtitle">Predicciones fuera de muestra (OOF) sobre todo el dataset manual</p></div></div><div class="table-wrap"><table><thead><tr><th>Tarea</th><th>Modelo</th><th>Accuracy</th><th>Balanced accuracy</th><th>Macro-F1</th><th>Micro-F1</th></tr></thead><tbody id="modelsTable"></tbody></table></div></article>
+        </section>
+
+        <section class="view" id="view-calidad" data-title="Calidad y limitaciones">
+          <div class="page-heading"><div><p class="eyebrow">Trazabilidad metodológica</p><h2>Calidad, cobertura y límites</h2><p class="lead">La calidad no se reduce a una métrica: incluye acuerdo humano, cobertura léxica, control de duplicados, evaluación fuera de muestra y protección de identidad.</p></div><span class="scope-pill">Auditoría reproducible</span></div>
+          <div class="grid kpi-grid">
+            <article class="card"><div class="quality-score"><div class="score-ring" style="--score:41.85%" data-value="0,418"></div><div><h4>Kappa polaridad</h4><p>Acuerdo moderado entre anotadores.</p></div></div></article>
+            <article class="card"><div class="quality-score"><div class="score-ring" style="--score:43.24%" data-value="0,432"></div><div><h4>Kappa emoción</h4><p>Emoción principal antes de adjudicar.</p></div></div></article>
+            <article class="card"><div class="quality-score"><div class="score-ring" style="--score:52.32%" data-value="0,523"></div><div><h4>Jaccard</h4><p>Coincidencia de conjuntos emocionales.</p></div></div></article>
+            <article class="card"><div class="quality-score"><div class="score-ring" style="--score:24.59%" data-value="24,6%"></div><div><h4>Cobertura léxica</h4><p>Diccionario ampliado en el corpus.</p></div></div></article>
+          </div>
+          <div class="grid two-col mt">
+            <article class="card"><div class="card-header"><div><h3 class="card-title">Acuerdo por variable</h3><p class="card-subtitle">Antes de la resolución de discrepancias</p></div></div><div class="bars" id="agreementBars"></div></article>
+            <article class="card"><div class="card-header"><div><h3 class="card-title">Qué controles se aplicaron</h3><p class="card-subtitle">Decisiones que hacen defendible el resultado</p></div></div><ul class="checklist"><li>Dos anotaciones independientes y adjudicación de desacuerdos.</li><li>Validación de valores permitidos, campos obligatorios y coherencia interna.</li><li>Agrupación por texto normalizado durante la validación cruzada.</li><li>Comparación contra baseline, diccionario, TF-IDF y MiniLM.</li><li>Clasificación final con probabilidades y configuración conservada.</li><li>Resultados públicos sin nombres ni texto de mensajes.</li></ul></article>
+          </div>
+          <div class="grid equal-col mt">
+            <article class="card"><h3 class="card-title">Cobertura del diccionario</h3><p class="card-subtitle">El recurso léxico propio creció, pero no reemplaza al modelo.</p><div class="model-row"><span class="model-name">Diccionario original</span><div class="model-track"><div class="model-fill" style="width:9.44%;background:#9aacbd"></div></div><span class="model-value">9,44 %</span></div><div class="model-row winner"><span class="model-name">Diccionario ampliado</span><div class="model-track"><div class="model-fill" style="width:24.59%"></div></div><span class="model-value">24,59 %</span></div></article>
+            <article class="card"><h3 class="card-title">Limitaciones que deben declararse</h3><ul class="checklist mt"><li>El corpus pertenece a un único grupo y no representa a toda la carrera.</li><li>La muestra manual fue enriquecida; no es una muestra proporcional pura.</li><li>Ironía, contexto conversacional y modismos siguen causando errores.</li><li>Las clases minoritarias tienen menos soporte y resultados más variables.</li><li>Las fechas de 2022–2026 reflejan el historial exportado, no solo 2026.</li></ul></article>
+          </div>
+        </section>
+
+        <p class="footer">UMSA · Carrera de Informática · Data Mining · Datos procesados hasta el 12 de octubre de 2026</p>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Datos agregados: no se incluyen textos ni identidades de participantes.
+    const totals = { all: 21546, 2022: 1210, 2023: 3755, 2024: 5942, 2025: 6910, 2026: 3729 };
+    const polarityOrder = ["sin_sentimiento", "neutra", "negativa", "positiva", "ambigua", "mixta"];
+    const polarityLabels = { sin_sentimiento: "Sin sentimiento", neutra: "Neutra", negativa: "Negativa", positiva: "Positiva", ambigua: "Ambigua", mixta: "Mixta" };
+    const polarityColors = { sin_sentimiento: "#9aa7b6", neutra: "#5f78a7", negativa: "#e25353", positiva: "#16a085", ambigua: "#f59e0b", mixta: "#8b5cf6" };
+    const polarity = {
+      all: { sin_sentimiento: 8974, neutra: 5055, negativa: 3694, positiva: 2378, ambigua: 1030, mixta: 415 },
+      2022: { sin_sentimiento: 603, neutra: 189, negativa: 215, positiva: 145, ambigua: 42, mixta: 16 },
+      2023: { sin_sentimiento: 1646, neutra: 772, negativa: 668, positiva: 415, ambigua: 189, mixta: 65 },
+      2024: { sin_sentimiento: 2422, neutra: 1501, negativa: 984, positiva: 633, ambigua: 290, mixta: 112 },
+      2025: { sin_sentimiento: 2727, neutra: 1649, negativa: 1265, positiva: 776, ambigua: 355, mixta: 138 },
+      2026: { sin_sentimiento: 1576, neutra: 944, negativa: 562, positiva: 409, ambigua: 154, mixta: 84 }
+    };
+    const emotionOrder = ["curiosidad", "preocupacion", "tristeza", "confusion", "decepcion", "esperanza", "gratitud", "alegria", "admiracion", "enojo"];
+    const emotionLabels = { curiosidad: "Curiosidad", preocupacion: "Preocupación", tristeza: "Tristeza", confusion: "Confusión", decepcion: "Decepción", esperanza: "Esperanza", gratitud: "Gratitud", alegria: "Alegría", admiracion: "Admiración", enojo: "Enojo", sin_sentimiento: "Sin sentimiento" };
+    const emotions = {
+      all: { sin_sentimiento: 8919, curiosidad: 5558, preocupacion: 2280, tristeza: 1783, confusion: 1531, decepcion: 1309, esperanza: 879, gratitud: 731, alegria: 694, admiracion: 513, enojo: 467 },
+      2022: { sin_sentimiento: 562, curiosidad: 218, preocupacion: 196, confusion: 103, tristeza: 88, gratitud: 72, esperanza: 51, alegria: 41, decepcion: 34, enojo: 15, admiracion: 2 },
+      2023: { sin_sentimiento: 1625, curiosidad: 831, preocupacion: 392, tristeza: 382, confusion: 250, decepcion: 235, esperanza: 164, alegria: 146, gratitud: 140, admiracion: 81, enojo: 66 },
+      2024: { sin_sentimiento: 2370, curiosidad: 1629, preocupacion: 607, tristeza: 541, confusion: 414, decepcion: 365, esperanza: 249, alegria: 202, gratitud: 195, enojo: 121, admiracion: 112 },
+      2025: { sin_sentimiento: 2804, curiosidad: 1810, preocupacion: 719, tristeza: 518, confusion: 498, decepcion: 493, esperanza: 272, alegria: 217, gratitud: 211, enojo: 203, admiracion: 193 },
+      2026: { sin_sentimiento: 1558, curiosidad: 1070, preocupacion: 366, confusion: 266, tristeza: 254, decepcion: 182, esperanza: 143, admiracion: 125, gratitud: 113, alegria: 88, enojo: 62 }
+    };
+    const emotionMetrics = {
+      admiracion: { support: 24, precision: .516129, recall: .666667, f1: .581818 },
+      alegria: { support: 28, precision: .225352, recall: .571429, f1: .323232 },
+      confusion: { support: 52, precision: .12, recall: .230769, f1: .157895 },
+      curiosidad: { support: 143, precision: .433962, recall: .643357, f1: .518310 },
+      decepcion: { support: 60, precision: .246032, recall: .516667, f1: .333333 },
+      enojo: { support: 24, precision: .153846, recall: .166667, f1: .16 },
+      esperanza: { support: 51, precision: .166667, recall: .215686, f1: .188034 },
+      gratitud: { support: 43, precision: .878049, recall: .837209, f1: .857143 },
+      preocupacion: { support: 108, precision: .313830, recall: .546296, f1: .398649 },
+      tristeza: { support: 29, precision: .147826, recall: .586207, f1: .236111 }
+    };
+    const models = [
+      { task: "Polaridad", key: "baseline", name: "Baseline mayoritario", accuracy: .422120, balanced: .166667, macro: .098941, micro: .422120 },
+      { task: "Polaridad", key: "diccionario", name: "Diccionario de reglas", accuracy: .540092, balanced: .375691, macro: .354195, micro: .540092 },
+      { task: "Polaridad", key: "tfidf", name: "TF-IDF + logística", accuracy: .399078, balanced: .319088, macro: .305215, micro: .399078 },
+      { task: "Polaridad", key: "minilm", name: "MiniLM + logística", accuracy: .470968, balanced: .382462, macro: .369276, micro: .470968 },
+      { task: "Polaridad", key: "hibrido", name: "Híbrido TF-IDF + MiniLM", accuracy: .529954, balanced: .401264, macro: .393032, micro: .529954 },
+      { task: "Emociones", key: "baseline", name: "Baseline sin emoción", accuracy: .492166, balanced: null, macro: 0, micro: 0 },
+      { task: "Emociones", key: "diccionario", name: "Diccionario de reglas", accuracy: .478341, balanced: null, macro: .333187, micro: .323322 },
+      { task: "Emociones", key: "tfidf", name: "TF-IDF + logística", accuracy: .386175, balanced: null, macro: .311572, micro: .324658 },
+      { task: "Emociones", key: "minilm", name: "MiniLM + logística", accuracy: .291244, balanced: null, macro: .336476, micro: .340484 },
+      { task: "Emociones", key: "hibrido", name: "Híbrido TF-IDF + MiniLM", accuracy: .444240, balanced: null, macro: .375453, micro: .382315 }
+    ];
+    const agreements = [
+      ["Presencia de sentimiento", .706912], ["Polaridad", .588018], ["Emoción principal", .574194],
+      ["Intensidad", .555760], ["Tema", .415668], ["Ironía", .947465], ["Confianza", .457143]
+    ];
+    let currentView = "resumen";
+    let currentYear = "all";
+    const fmtInt = value => new Intl.NumberFormat("es-BO").format(value);
+    const fmtPct = (value, digits = 1) => new Intl.NumberFormat("es-BO", { style: "percent", minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+    const fmtDec = (value, digits = 3) => value == null ? "—" : new Intl.NumberFormat("es-BO", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+    const titleYear = key => key === "all" ? "Todas las gestiones" : `Gestión ${key}`;
+    const shortYear = key => key === "all" ? "2022–2026" : key;
+
+    function barRows(items, max, color = "#07847c") {
+      return items.map(item => `<div class="bar-row"><span class="bar-label" title="${item.label}">${item.label}</span><div class="bar-track"><div class="bar-fill" style="width:${max ? item.value / max * 100 : 0}%;--bar-color:${item.color || color}"></div></div><span class="bar-value">${item.display}</span></div>`).join("");
+    }
+
+    function renderScope() {
+      document.querySelectorAll(".scope-label").forEach(el => el.textContent = titleYear(currentYear));
+      document.querySelectorAll(".scope-short").forEach(el => el.textContent = shortYear(currentYear));
+      document.querySelectorAll(".js-total").forEach(el => el.textContent = fmtInt(totals[currentYear]));
+    }
+
+    function renderPolarity() {
+      const values = polarity[currentYear];
+      const total = totals[currentYear];
+      let cursor = 0;
+      const segments = polarityOrder.map(key => {
+        const start = cursor;
+        cursor += values[key] / total * 100;
+        return `${polarityColors[key]} ${start.toFixed(3)}% ${cursor.toFixed(3)}%`;
+      });
+      document.getElementById("overviewDonut").style.background = `conic-gradient(${segments.join(",")})`;
+      const legendHtml = polarityOrder.map(key => `<div class="legend-item"><i class="dot" style="background:${polarityColors[key]}"></i><span>${polarityLabels[key]}</span><strong>${fmtPct(values[key] / total)}</strong></div>`).join("");
+      document.getElementById("overviewLegend").innerHTML = legendHtml;
+      document.getElementById("stackLegend").innerHTML = polarityOrder.map(key => `<div class="legend-item"><i class="dot" style="background:${polarityColors[key]}"></i><span>${polarityLabels[key]}</span></div>`).join("");
+      const pItems = polarityOrder.map(key => ({ label: polarityLabels[key], value: values[key], color: polarityColors[key], display: `<strong>${fmtInt(values[key])}</strong> · ${fmtPct(values[key] / total)}` }));
+      document.getElementById("polarityBars").innerHTML = barRows(pItems, Math.max(...pItems.map(x => x.value)));
+      document.getElementById("polarityTable").innerHTML = pItems.map(x => `<tr><td><i class="dot" style="display:inline-block;margin-right:7px;background:${x.color}"></i>${x.label}</td><td>${fmtInt(x.value)}</td><td>${fmtPct(x.value / total, 2)}</td></tr>`).join("");
+      document.getElementById("yearStacks").innerHTML = [2022, 2023, 2024, 2025, 2026].map(year => `<div class="stack-row"><span class="stack-year">${year}</span><div class="stack" title="Distribución de ${year}">${polarityOrder.map(key => `<span style="width:${polarity[year][key] / totals[year] * 100}%;background:${polarityColors[key]}" title="${polarityLabels[key]}: ${fmtInt(polarity[year][key])}"></span>`).join("")}</div><span class="stack-total">${fmtInt(totals[year])}</span></div>`).join("");
+      const affective = total - values.sin_sentimiento - values.neutra;
+      document.getElementById("summaryInsight").innerHTML = `<strong>Lectura principal.</strong> En ${titleYear(currentYear).toLowerCase()}, ${fmtPct(values.sin_sentimiento / total)} de los mensajes no presenta señal afectiva suficiente y ${fmtPct(values.neutra / total)} se clasifica como neutral. Las cuatro polaridades con carga afectiva reúnen ${fmtInt(affective)} mensajes (${fmtPct(affective / total)}).`;
+    }
+
+    function renderEmotions() {
+      const values = emotions[currentYear];
+      const total = totals[currentYear];
+      const sorted = [...emotionOrder].sort((a, b) => values[b] - values[a]);
+      const items = sorted.map(key => ({ label: emotionLabels[key], value: values[key], display: `<strong>${fmtInt(values[key])}</strong> · ${fmtPct(values[key] / total)}` }));
+      document.getElementById("overviewEmotionBars").innerHTML = barRows(items.slice(0, 5), items[0].value, "#3b82f6");
+      document.getElementById("emotionBars").innerHTML = barRows(items, items[0].value, "#8b5cf6");
+      const metricItems = [...emotionOrder].sort((a,b) => emotionMetrics[b].f1 - emotionMetrics[a].f1).map(key => ({ label: emotionLabels[key], value: emotionMetrics[key].f1, display: `<strong>${fmtDec(emotionMetrics[key].f1)}</strong>` }));
+      document.getElementById("emotionF1Bars").innerHTML = barRows(metricItems, 1, "#f59e0b");
+      document.getElementById("emotionTable").innerHTML = sorted.map(key => { const m = emotionMetrics[key]; return `<tr><td>${emotionLabels[key]}</td><td>${fmtInt(values[key])}</td><td>${fmtPct(values[key] / total, 2)}</td><td>${m.support}</td><td>${fmtDec(m.precision)}</td><td>${fmtDec(m.recall)}</td><td><strong>${fmtDec(m.f1)}</strong></td></tr>`; }).join("");
+    }
+
+    function renderModels() {
+      const make = task => models.filter(x => x.task === task).map(x => `<div class="model-row ${x.key === "hibrido" ? "winner" : ""}"><span class="model-name">${x.name}</span><div class="model-track"><div class="model-fill" style="width:${x.macro * 100}%"></div></div><span class="model-value">${fmtDec(x.macro)}</span></div>`).join("");
+      document.getElementById("polarityModels").innerHTML = make("Polaridad");
+      document.getElementById("emotionModels").innerHTML = make("Emociones");
+      document.getElementById("modelsTable").innerHTML = models.map(x => `<tr><td>${x.task}</td><td>${x.name}${x.key === "hibrido" ? " ★" : ""}</td><td>${fmtDec(x.accuracy)}</td><td>${fmtDec(x.balanced)}</td><td><strong>${fmtDec(x.macro)}</strong></td><td>${fmtDec(x.micro)}</td></tr>`).join("");
+    }
+
+    function renderQuality() {
+      document.getElementById("agreementBars").innerHTML = barRows(agreements.map(([label, value]) => ({ label, value, display: `<strong>${fmtPct(value)}</strong>` })), 1, "#07847c");
+    }
+
+    function setView(view) {
+      currentView = view;
+      document.querySelectorAll(".view").forEach(el => el.classList.toggle("active", el.id === `view-${view}`));
+      document.querySelectorAll(".nav-button").forEach(el => el.classList.toggle("active", el.dataset.view === view));
+      const active = document.getElementById(`view-${view}`);
+      document.getElementById("topTitle").textContent = active.dataset.title;
+      document.getElementById("sidebar").classList.remove("open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function csvRows() {
+      if (currentView === "polaridad" || currentView === "resumen") return [["gestion", "polaridad", "mensajes", "porcentaje"], ...polarityOrder.map(key => [shortYear(currentYear), polarityLabels[key], polarity[currentYear][key], (polarity[currentYear][key] / totals[currentYear]).toFixed(6)])];
+      if (currentView === "emociones") return [["gestion", "emocion", "mensajes", "porcentaje_mensajes", "soporte_prueba", "precision", "recall", "f1"], ...emotionOrder.map(key => [shortYear(currentYear), emotionLabels[key], emotions[currentYear][key], (emotions[currentYear][key] / totals[currentYear]).toFixed(6), emotionMetrics[key].support, emotionMetrics[key].precision, emotionMetrics[key].recall, emotionMetrics[key].f1])];
+      if (currentView === "modelos") return [["tarea", "modelo", "accuracy", "balanced_accuracy", "macro_f1", "micro_f1"], ...models.map(x => [x.task, x.name, x.accuracy, x.balanced ?? "", x.macro, x.micro])];
+      return [["variable", "acuerdo"], ...agreements];
+    }
+
+    function downloadCsv() {
+      const text = csvRows().map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
+      const blob = new Blob(["\ufeff" + text], { type: "text/csv;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `dashboard_${currentView}_${shortYear(currentYear)}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    document.querySelectorAll(".nav-button").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
+    document.getElementById("yearSelect").addEventListener("change", event => { currentYear = event.target.value; renderScope(); renderPolarity(); renderEmotions(); });
+    document.getElementById("menuButton").addEventListener("click", () => document.getElementById("sidebar").classList.toggle("open"));
+    document.getElementById("downloadButton").addEventListener("click", downloadCsv);
+    document.getElementById("printButton").addEventListener("click", () => window.print());
+    document.addEventListener("keydown", event => { if (event.key === "Escape") document.getElementById("sidebar").classList.remove("open"); });
+    renderScope(); renderPolarity(); renderEmotions(); renderModels(); renderQuality();
+  </script>
+</body>
+</html>

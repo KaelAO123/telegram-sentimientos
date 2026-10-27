@@ -2,13 +2,31 @@ source("R/funciones.R", encoding = "UTF-8")
 source("R/preprocesamiento_texto.R", encoding = "UTF-8")
 verificar_paquetes()
 
-archivo <- "datos/dataset_manual/dataset_sentimientos_umsa.csv"
+archivo_adjudicado <- "datos/dataset_manual/dataset_modelado_umsa.csv"
+archivo <- if (file.exists(archivo_adjudicado)) {
+  archivo_adjudicado
+} else {
+  "datos/dataset_manual/dataset_sentimientos_umsa.csv"
+}
 salida <- "resultados/mineria_dataset"
 graficos <- "resultados/graficos_dataset"
 dir.create(salida, recursive = TRUE, showWarnings = FALSE)
 dir.create(graficos, recursive = TRUE, showWarnings = FALSE)
 
 datos <- readr::read_csv(archivo, show_col_types = FALSE)
+if (all(c("polaridad_objetivo", "sentimientos_objetivo") %in% names(datos))) {
+  sentimientos_separados <- stringr::str_split_fixed(
+    datos$sentimientos_objetivo,
+    stringr::fixed(";"),
+    2
+  )
+  datos <- datos |>
+    dplyr::mutate(
+      polaridad_manual = .data$polaridad_objetivo,
+      sentimiento_1 = sentimientos_separados[, 1],
+      sentimiento_2 = sentimientos_separados[, 2]
+    )
+}
 if (nrow(datos) < 50) stop("Etiquete y valide al menos 50 mensajes antes de ejecutar la mineria descriptiva.", call. = FALSE)
 
 # Tokenizacion y matriz documento-termino con quanteda.
@@ -27,11 +45,11 @@ distribucion_sentimientos <- datos |> dplyr::count(.data$sentimiento_1, sort = T
 distribucion_polaridad <- datos |> dplyr::count(.data$polaridad_manual, sort = TRUE)
 distribucion_temas <- datos |> dplyr::count(.data$tema, sort = TRUE)
 terminos_frecuentes <- extraer_top_por_grupo(dfmat_grupo, n = 15, nombre_valor = "frecuencia") |>
-  dplyr::rename(sentimiento_1 = .data$grupo, palabra = .data$token)
+  dplyr::rename(sentimiento_1 = grupo, palabra = token)
 terminos_tfidf <- extraer_top_por_grupo(dfmat_tfidf, n = 15, nombre_valor = "tf_idf") |>
-  dplyr::rename(sentimiento_1 = .data$grupo, palabra = .data$token)
+  dplyr::rename(sentimiento_1 = grupo, palabra = token)
 bigramas <- extraer_top_por_grupo(dfmat_bigramas, n = 10, nombre_valor = "frecuencia") |>
-  dplyr::rename(sentimiento_1 = .data$grupo, bigrama = .data$token)
+  dplyr::rename(sentimiento_1 = grupo, bigrama = token)
 
 # Asociaciones descriptivas sentimiento-tema.
 asociaciones <- datos |>
@@ -75,5 +93,8 @@ p <- ggplot2::ggplot(distribucion_sentimientos, ggplot2::aes(stats::reorder(.dat
   ggplot2::geom_col(fill = "#2C7FB8") + ggplot2::coord_flip() +
   ggplot2::labs(title = "Distribucion del dataset manual", x = NULL, y = "Mensajes") + tema_umsa()
 ggplot2::ggsave(file.path(graficos, "01_distribucion_dataset.png"), p, width = 9, height = 6, dpi = 160)
-message("Mineria descriptiva terminada con ", nrow(datos), " mensajes etiquetados.")
+message(
+  "Mineria descriptiva terminada con ", nrow(datos),
+  " mensajes etiquetados desde ", archivo, "."
+)
 

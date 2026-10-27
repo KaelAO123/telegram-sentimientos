@@ -9,7 +9,7 @@ Cada fila representa un mensaje de texto del chat de temporada. Los nombres est�
 1. Trabaje sobre `etiquetado_anotador_a.csv`.
 2. No consulte `referencia_reglas_no_usar_al_etiquetar.csv` hasta terminar: sus sugerencias podrían sesgar la decisión.
 3. Lea únicamente lo expresado en el mensaje y no infiera estados psicológicos.
-4. Un segundo anotador puede trabajar independientemente en `etiquetado_anotador_b.csv`. Es suficiente una submuestra común de al menos 20 % para medir acuerdo.
+4. El segundo anotador trabaja independientemente en `etiquetado_anotador_b.csv`; en la versión final se completaron las 1.085 filas para medir acuerdo en toda la muestra.
 5. No modifique las columnas comprendidas entre `message_id` y `tipo_muestreo`.
 
 ## Etiquetas
@@ -57,4 +57,41 @@ Rscript scripts/05_preprocesamiento_librerias.R
 ```
 
 La validación detecta valores incorrectos, consolida las filas completas y calcula kappa de Cohen. La minería genera frecuencias, TF-IDF, bigramas y asociaciones; no entrena modelos.
+
+## Consenso y adjudicación
+
+La validación genera además:
+
+- `acuerdo_por_variable.csv`: acuerdo y kappa para cada variable;
+- `dataset_consenso_umsa.csv`: distingue `acuerdo_ab`, `desacuerdo_ab` y `solo_a`;
+- `desacuerdos_anotacion.csv`: todos los desacuerdos descriptivos;
+- `desacuerdos_modelado.csv`: solo los desacuerdos de polaridad o sentimientos que
+  afectan al modelo.
+
+Las columnas adjudicadas deben completarse mediante revisión humana. No se deben
+copiar automáticamente las etiquetas de A o B. Después se ejecuta:
+
+```bash
+Rscript scripts/07_consolidar_adjudicaciones.R
+```
+
+El resultado `dataset_modelado_umsa.csv` conserva la fuente de cada etiqueta:
+`acuerdo_ab`, `adjudicado` o `solo_a`.
+
+## Estado final y modelado
+
+El dataset final contiene 1.085 objetivos completos. Antes de adjudicar, kappa es
+0,418 en polaridad y 0,432 en emoción principal. La validación cruzada y la
+clasificación del corpus se ejecutan con:
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  .venv-embeddings/bin/python scripts/09_validacion_cruzada.py
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  .venv-embeddings/bin/python scripts/10_clasificar_corpus.py --batch-size 256
+```
+
+Se modelan diez emociones con soporte mínimo de veinte casos. La muestra está
+enriquecida y no debe usarse directamente para estimar prevalencias poblacionales;
+las predicciones del corpus completo son resultados exploratorios del modelo.
 

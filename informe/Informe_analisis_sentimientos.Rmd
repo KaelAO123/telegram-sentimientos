@@ -14,25 +14,37 @@ params:
 
 ```{r configuracion, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center")
+raiz_proyecto <- normalizePath("..")
+ruta <- function(...) file.path(raiz_proyecto, ...)
 library(dplyr)
 library(readr)
 library(ggplot2)
 library(scales)
-mensajes <- read_csv("resultados/datos/mensajes_clasificados.csv", show_col_types = FALSE)
-coincidencias <- read_csv("resultados/datos/coincidencias_emociones.csv", show_col_types = FALSE)
-diccionario <- read_csv("resultados/datos/diccionario_sentimientos.csv", show_col_types = FALSE)
-resumen_emociones <- read_csv("resultados/datos/resumen_emociones.csv", show_col_types = FALSE)
-resumen_polaridad <- read_csv("resultados/datos/resumen_polaridad.csv", show_col_types = FALSE)
-resumen_gestion <- read_csv("resultados/datos/resumen_por_gestion.csv", show_col_types = FALSE)
-comparacion_cobertura <- read_csv("resultados/datos/comparacion_cobertura.csv", show_col_types = FALSE)
-cobertura_gestion <- read_csv("resultados/datos/cobertura_por_gestion.csv", show_col_types = FALSE)
-tipos_coincidencia <- read_csv("resultados/datos/resumen_tipo_coincidencia.csv", show_col_types = FALSE)
-pares_emociones <- read_csv("resultados/datos/coocurrencia_emociones.csv", show_col_types = FALSE)
-motivos_no_clasificados <- read_csv("resultados/datos/resumen_no_clasificados.csv", show_col_types = FALSE)
-archivo_diseno <- "datos/dataset_manual/diseno_muestra.csv"
+mensajes <- read_csv(ruta("resultados/datos/mensajes_clasificados.csv"), show_col_types = FALSE)
+coincidencias <- read_csv(ruta("resultados/datos/coincidencias_emociones.csv"), show_col_types = FALSE)
+diccionario <- read_csv(ruta("resultados/datos/diccionario_sentimientos.csv"), show_col_types = FALSE)
+resumen_emociones <- read_csv(ruta("resultados/datos/resumen_emociones.csv"), show_col_types = FALSE)
+resumen_polaridad <- read_csv(ruta("resultados/datos/resumen_polaridad.csv"), show_col_types = FALSE)
+resumen_gestion <- read_csv(ruta("resultados/datos/resumen_por_gestion.csv"), show_col_types = FALSE)
+comparacion_cobertura <- read_csv(ruta("resultados/datos/comparacion_cobertura.csv"), show_col_types = FALSE)
+cobertura_gestion <- read_csv(ruta("resultados/datos/cobertura_por_gestion.csv"), show_col_types = FALSE)
+tipos_coincidencia <- read_csv(ruta("resultados/datos/resumen_tipo_coincidencia.csv"), show_col_types = FALSE)
+pares_emociones <- read_csv(ruta("resultados/datos/coocurrencia_emociones.csv"), show_col_types = FALSE)
+motivos_no_clasificados <- read_csv(ruta("resultados/datos/resumen_no_clasificados.csv"), show_col_types = FALSE)
+archivo_diseno <- ruta("datos/dataset_manual/diseno_muestra.csv")
 diseno_muestra <- if (file.exists(archivo_diseno)) read_csv(archivo_diseno, show_col_types = FALSE) else NULL
-archivo_matriz <- "resultados/preprocesamiento/resumen_matriz_documento_termino.csv"
+archivo_matriz <- ruta("resultados/preprocesamiento/resumen_matriz_documento_termino.csv")
 resumen_matriz <- if (file.exists(archivo_matriz)) read_csv(archivo_matriz, show_col_types = FALSE) else NULL
+archivo_modelado <- ruta("datos/dataset_manual/dataset_modelado_umsa.csv")
+dataset_modelado <- if (file.exists(archivo_modelado)) read_csv(archivo_modelado, show_col_types = FALSE) else NULL
+archivo_control <- ruta("datos/dataset_manual/control_calidad.csv")
+control_calidad <- if (file.exists(archivo_control)) read_csv(archivo_control, show_col_types = FALSE) else NULL
+archivo_cv <- ruta("resultados/validacion_cruzada/comparacion_modelos.csv")
+metricas_cv <- if (file.exists(archivo_cv)) read_csv(archivo_cv, show_col_types = FALSE) else NULL
+archivo_polaridad_modelo <- ruta("resultados/modelo_final/resumen_polaridad.csv")
+polaridad_modelo <- if (file.exists(archivo_polaridad_modelo)) read_csv(archivo_polaridad_modelo, show_col_types = FALSE) else NULL
+archivo_emociones_modelo <- ruta("resultados/modelo_final/resumen_emociones.csv")
+emociones_modelo <- if (file.exists(archivo_emociones_modelo)) read_csv(archivo_emociones_modelo, show_col_types = FALSE) else NULL
 ```
 
 # Resumen ejecutivo
@@ -41,9 +53,17 @@ Se analizaron **`r scales::number(nrow(mensajes), accuracy = 1, big.mark = ".", 
 
 El resultado describe el lenguaje que coincide con el diccionario proporcionado; no equivale a una medición psicológica de los participantes.
 
+La referencia manual final contiene 1.085 mensajes con doble anotación y
+adjudicación. En validación cruzada de cinco folds, el híbrido TF-IDF+MiniLM alcanzó
+macro-F1 de 0,393 en polaridad y 0,375 en diez emociones, y luego se aplicó de
+forma exploratoria al corpus completo.
+
 # Objetivo
 
-Construir un dataset propio de sentimientos a partir del chat de temporada de la Carrera de Informática de la UMSA y aplicar técnicas descriptivas de minería de texto en R: limpieza, transformación, frecuencias, patrones, asociaciones, n-gramas y análisis temporal.
+Construir un dataset propio de sentimientos a partir del chat de temporada de la
+Carrera de Informática de la UMSA y aplicar minería descriptiva y modelado
+supervisado: limpieza, transformación, frecuencias, asociaciones, evaluación
+fuera de muestra y análisis temporal agregado.
 
 # Datos y privacidad
 
@@ -72,6 +92,9 @@ mensajes |>
 7. `syuzhet` se usa con un léxico personalizado en español para producir un puntaje auxiliar de polaridad; no se usa su diccionario inglés como verdad del dataset.
 8. Un mensaje puede tener varias emociones. La polaridad es **mixta** si contiene señales positivas y negativas; es **neutra** cuando solo tiene sorpresa o curiosidad. **Sin coincidencia** significa que el léxico no encontró evidencia y no debe interpretarse como neutralidad.
 9. Los resultados se agruparon por emoción, polaridad, mes y gestión.
+10. Dos anotadores etiquetaron la muestra y los desacuerdos se adjudicaron.
+11. Los clasificadores se evaluaron con cinco folds agrupados por texto duplicado.
+12. El híbrido seleccionado se entrenó con toda la referencia y se aplicó al corpus.
 
 Este es un método basado en reglas: es transparente y replicable, pero no resuelve siempre negaciones, ironía, contexto, modismos nuevos ni el significado de contenido multimedia.
 
@@ -107,7 +130,11 @@ La etapa posterior de minería utiliza:
 - asociaciones entre sentimiento y tema mediante soporte, confianza y *lift*;
 - evolución por gestión, mes, día y hora.
 
-No se entrena un clasificador predictivo: las etiquetas del dataset proceden del trabajo manual del investigador.
+Después del etiquetado independiente, los desacuerdos se adjudican sin alterar las
+decisiones originales. Con el objetivo final se comparan un diccionario de reglas,
+TF-IDF, embeddings MiniLM y una representación híbrida TF-IDF+MiniLM. La evaluación
+usa cinco folds estratificados y agrupados por hash del texto para impedir que un
+mensaje duplicado aparezca simultáneamente en entrenamiento y prueba.
 
 ## Mejora de cobertura
 
@@ -240,11 +267,117 @@ motivos_no_clasificados |>
   knitr::kable()
 ```
 
+# Validación humana y modelado predictivo
+
+La referencia final contiene 1.085 mensajes con dos anotaciones independientes.
+Kappa se calcula antes de la adjudicación: cuantifica la reproducibilidad de los
+criterios, mientras que la adjudicación produce el objetivo utilizado para entrenar.
+
+```{r control-calidad-manual, echo=FALSE}
+if (!is.null(control_calidad)) {
+  control_calidad |>
+    transmute(
+      `Etiquetas válidas A` = completas_anotador_a,
+      `Etiquetas válidas B` = completas_anotador_b,
+      `Kappa polaridad` = round(kappa_polaridad, 3),
+      `Kappa emoción principal` = round(kappa_sentimiento, 3),
+      `Jaccard emociones` = round(jaccard_sentimientos, 3)
+    ) |>
+    knitr::kable(caption = "Control de calidad antes de la adjudicación")
+}
+```
+
+```{r distribucion-objetivo-final, echo=FALSE}
+if (!is.null(dataset_modelado)) {
+  dataset_modelado |>
+    count(polaridad_objetivo, sort = TRUE) |>
+    mutate(Porcentaje = percent(n / sum(n), accuracy = 0.1)) |>
+    select(Polaridad = polaridad_objetivo, Mensajes = n, Porcentaje) |>
+    knitr::kable(caption = "Distribución de la polaridad adjudicada")
+}
+```
+
+## Validación cruzada de modelos
+
+Las siguientes métricas se calculan concatenando las predicciones fuera de muestra
+de los cinco folds. Se prioriza macro-F1 porque asigna el mismo peso a clases
+frecuentes y poco frecuentes. La exactitud multietiqueta exige acertar el conjunto
+completo de emociones y por eso no debe interpretarse de forma aislada.
+
+```{r tabla-validacion-cruzada, echo=FALSE}
+if (!is.null(metricas_cv)) {
+  metricas_cv |>
+    mutate(
+      Tarea = recode(task, polaridad = "Polaridad", emociones_multietiqueta = "Emociones"),
+      Modelo = recode(
+        model,
+        baseline_mayoritario = "Mayoritaria",
+        baseline_sin_emocion = "Sin emoción",
+        diccionario_reglas = "Diccionario",
+        tfidf_logistica = "TF-IDF",
+        minilm_logistica = "MiniLM",
+        hibrido_tfidf_minilm = "TF-IDF + MiniLM"
+      ),
+      `Macro-F1` = round(macro_f1, 3),
+      `Micro-F1` = round(micro_f1, 3),
+      Exactitud = round(accuracy, 3)
+    ) |>
+    select(Tarea, Modelo, `Macro-F1`, `Micro-F1`, Exactitud) |>
+    knitr::kable(caption = "Resultados agregados de validación cruzada")
+}
+```
+
+```{r grafico-validacion-cruzada, echo=FALSE, out.width='90%'}
+grafico_cv <- ruta("resultados/validacion_cruzada/graficos/01_comparacion_macro_f1.png")
+if (file.exists(grafico_cv)) knitr::include_graphics(grafico_cv, rel_path = FALSE)
+```
+
+El híbrido TF-IDF+MiniLM obtiene el mejor macro-F1 tanto en polaridad como en
+emociones. TF-IDF conserva información léxica local, mientras que MiniLM aporta
+similitud semántica multilingüe; su combinación resulta complementaria.
+
+## Aplicación al corpus completo
+
+Después de seleccionar el modelo, se entrena con las 1.085 etiquetas y se aplica a
+los 21.546 mensajes. Estas son predicciones exploratorias: describen la salida del
+modelo y no estados psicológicos de los participantes.
+
+La mediana de la probabilidad máxima es aproximadamente 0,423 para polaridad y
+0,558 para emociones. Esto confirma que numerosos mensajes son inciertos y que
+las tablas deben interpretarse de forma agregada, no como decisiones infalibles por mensaje.
+
+```{r tabla-polaridad-modelo-final, echo=FALSE}
+if (!is.null(polaridad_modelo)) {
+  polaridad_modelo |>
+    mutate(Porcentaje = percent(porcentaje, accuracy = 0.1)) |>
+    select(Polaridad = polaridad_predicha, Mensajes = mensajes, Porcentaje) |>
+    knitr::kable(caption = "Polaridad predicha en el corpus completo")
+}
+```
+
+```{r tabla-emociones-modelo-final, echo=FALSE}
+if (!is.null(emociones_modelo)) {
+  emociones_modelo |>
+    mutate(Porcentaje = percent(porcentaje_mensajes, accuracy = 0.1)) |>
+    select(Emoción = emocion_predicha, Mensajes = mensajes, Porcentaje) |>
+    knitr::kable(caption = "Emociones predichas en el corpus completo")
+}
+```
+
+```{r graficos-modelo-final, echo=FALSE, out.width='48%', fig.show='hold'}
+graficos_modelo <- c(
+  ruta("resultados/modelo_final/graficos/01_polaridad_corpus.png"),
+  ruta("resultados/modelo_final/graficos/02_emociones_corpus.png")
+)
+graficos_modelo <- graficos_modelo[file.exists(graficos_modelo)]
+if (length(graficos_modelo)) knitr::include_graphics(graficos_modelo, rel_path = FALSE)
+```
+
 # Conclusiones y limitaciones
 
 De los **`r sum(mensajes$polaridad != "sin coincidencia")` mensajes clasificados**, **`r percent(mean(mensajes$polaridad[mensajes$polaridad != "sin coincidencia"] == "positiva"), accuracy = 0.1)`** fueron positivos y **`r percent(mean(mensajes$polaridad[mensajes$polaridad != "sin coincidencia"] == "negativa"), accuracy = 0.1)`** negativos. **`r stringr::str_to_title(resumen_emociones$emocion[1])`** representó **`r percent(resumen_emociones$n[1] / sum(resumen_emociones$n), accuracy = 0.1)`** de todas las coincidencias emocionales y fue la señal dominante del léxico ampliado. En todas las gestiones, los mensajes positivos superaron a los negativos dentro del subconjunto clasificado.
 
-Sin embargo, **`r percent(mean(mensajes$polaridad == "sin coincidencia"), accuracy = 0.1)`** del corpus quedó sin coincidencia. Esto representa cobertura limitada del vocabulario, no ausencia de sentimiento, y obliga a interpretar las proporciones de polaridad sobre todo dentro del subconjunto clasificado. Para evaluar validez, se recomienda seleccionar una muestra aleatoria, etiquetarla manualmente por dos personas y calcular precisión, exhaustividad y acuerdo entre evaluadores.
+Sin embargo, **`r percent(mean(mensajes$polaridad == "sin coincidencia"), accuracy = 0.1)`** del corpus quedó sin coincidencia en el método basado en reglas. Esto representa cobertura limitada del vocabulario, no ausencia de sentimiento. La validación humana y la evaluación fuera de muestra permiten medir esa limitación: el híbrido mejora el macro-F1, pero sus errores y el desbalance de clases impiden interpretar las predicciones como certeza individual.
 
 Entre las limitaciones están el sesgo del diccionario, las expresiones locales no incluidas, los mensajes eliminados, la agrupación de todas las cuentas eliminadas bajo un mismo seudónimo y la exclusión de audio, imágenes, videos y stickers. El pie del documento fuente contiene una nota ambigua sobre reemplazos de categorías; este análisis conserva las 15 definiciones desarrolladas en el cuerpo del documento hasta confirmar esa indicación con la docente.
 
@@ -258,6 +391,9 @@ Rscript scripts/02_generar_dataset_manual.R
 Rscript scripts/03_validar_dataset_manual.R
 Rscript scripts/04_mineria_descriptiva.R
 Rscript scripts/05_preprocesamiento_librerias.R
+Rscript scripts/07_consolidar_adjudicaciones.R
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv-embeddings/bin/python scripts/09_validacion_cruzada.py
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv-embeddings/bin/python scripts/10_clasificar_corpus.py --batch-size 256
 ```
 
 Los dos últimos scripts se ejecutan conforme avance el etiquetado. Para otra gestión o exportación solo se cambia `CHAT_DIR` y, opcionalmente, `ANIOS_ANALISIS` en `configuracion.R`. La bitácora automática guarda fecha de ejecución, cobertura y huellas MD5 de los HTML de entrada.

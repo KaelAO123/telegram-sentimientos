@@ -1,29 +1,101 @@
+# ================================================================
+# DATOS PRIVADOS Y EXPORTACIONES DE TELEGRAM
+# ================================================================
+# La exportación original nunca debe publicarse, aunque el repositorio sea privado.
 ChatExport_*/
 ChatExport*/
 
+# Los CSV contienen mensajes, identificadores anonimizados o decisiones humanas.
+# Solo se versiona el diccionario de variables, que no contiene conversaciones.
 datos/dataset_manual/*.csv
 !datos/dataset_manual/diccionario_variables.csv
+datos/privados/
+datos/brutos/
+datos/raw/
+*.sqlite
+*.sqlite3
 
+# ================================================================
+# RESULTADOS, MODELOS Y PAQUETES GENERADOS
+# ================================================================
+# Todo este contenido se regenera ejecutando los scripts del proyecto.
 resultados/
 
+# Carpeta y archivos preparados para la entrega a la materia.
+entrega/
+*.rar
+*.7z
+*.zip
+
+# Informes compilados. Se versionan sus fuentes .md, .Rmd y .css.
+informe/*.pdf
+informe/*.docx
+informe/*.html
+
+# El dashboard autónomo no contiene mensajes ni nombres y sí se comparte con el equipo.
+!informe/Dashboard_Data_Mining.html
+
+# Archivos auxiliares de Pandoc, R Markdown, LaTeX o Quarto.
+*_cache/
+*_files/
+*.knit.md
+*.utf8.md
+*.aux
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.synctex.gz
+*.toc
+_site/
+.quarto/
+
+# ================================================================
+# R Y RSTUDIO
+# ================================================================
 .Rhistory
 .RData
 .Ruserdata
 .Rproj.user/
 .Renviron
-
+.Renviron.*
 renv/library/
 renv/staging/
 .lintr_cache/
+
+# ================================================================
+# PYTHON, EMBEDDINGS Y NOTEBOOKS
+# ================================================================
+.venv/
+.venv-embeddings/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
 .cache/
 
-*_cache/
-*_files/
-*.knit.md
-*.utf8.md
-informe/*.html
-informe/*.pdf
+# ================================================================
+# CREDENCIALES Y CONFIGURACIÓN LOCAL
+# ================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+secrets*.json
 
+# ================================================================
+# EDITORES, SISTEMA OPERATIVO Y ARCHIVOS TEMPORALES
+# ================================================================
 .vscode/
 .idea/
 .agents/
@@ -32,9 +104,13 @@ informe/*.pdf
 
 .DS_Store
 Thumbs.db
+desktop.ini
 *.log
 *.tmp
+*.temp
 *.bak
+*.swp
+*.swo
 *~
 .~lock.*#
 ~$*
